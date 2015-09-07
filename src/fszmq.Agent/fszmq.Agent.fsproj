@@ -92,4 +92,8 @@
       </ItemGroup>
     </When>
   </Choose>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

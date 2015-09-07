@@ -14,7 +14,10 @@
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>EvoDistroLisa.Hub</Name>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,25 +25,22 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\Debug\EvoDistroLisa.Hub.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
     <StartArguments>--restart monalisa.png</StartArguments>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\Release\EvoDistroLisa.Hub.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
     <StartArguments>--restart monalisa.png</StartArguments>
-  </PropertyGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
@@ -59,9 +59,6 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <Content Include="paket.references" />
-    <None Include="libzmq.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="monalisa.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -117,4 +114,7 @@
       </ItemGroup>
     </When>
   </Choose>
+  <PropertyGroup>
+    <PreBuildEvent>call $(ProjectDir)\..\resources\pull.cmd $(PlatformName) libzmq.dll</PreBuildEvent>
+  </PropertyGroup>
 </Project>
