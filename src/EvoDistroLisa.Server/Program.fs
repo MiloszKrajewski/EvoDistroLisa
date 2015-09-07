@@ -1,4 +1,4 @@
-﻿namespace EvoDistroLisa.Hub
+﻿namespace EvoDistroLisa.Server
 
 open Nessos.Argu
 

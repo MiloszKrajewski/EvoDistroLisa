@@ -1,4 +1,4 @@
-﻿namespace EvoDistroLisa.Grinder
+﻿namespace EvoDistroLisa.Client
 
 open Nessos.Argu
 

@@ -197,3 +197,4 @@ FakesAssemblies/
 
 # custom ignores
 src/.paket/paket.exe
+src/.fake/

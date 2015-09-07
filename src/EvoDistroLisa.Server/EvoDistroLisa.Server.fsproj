@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>4a84bc6a-6b7e-413f-a71e-dbbc21ba4e11</ProjectGuid>
+    <ProjectGuid>699069d9-c6ad-43a1-9045-da49876d77b5</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>EvoDistroLisa.Hub</RootNamespace>
-    <AssemblyName>EvoDistroLisa.Hub</AssemblyName>
+    <RootNamespace>EvoDistroLisa.Server</RootNamespace>
+    <AssemblyName>EvoDistroLisa.Server</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>EvoDistroLisa.Hub</Name>
+    <Name>EvoDistroLisa.Server</Name>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -25,9 +25,8 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\EvoDistroLisa.Hub.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\EvoDistroLisa.Server.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>--restart monalisa.png</StartArguments>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
@@ -37,9 +36,8 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\EvoDistroLisa.Hub.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-    <StartArguments>--restart monalisa.png</StartArguments>
+    <DocumentationFile>bin\Release\EvoDistroLisa.Server.XML</DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <Choose>
@@ -56,12 +54,9 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="Program.fs" />
     <None Include="App.config" />
-    <Content Include="paket.references" />
-    <None Include="monalisa.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="paket.references" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -89,6 +84,11 @@
       <Project>{044c7441-b757-46d4-af5f-63777bdc7f43}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\EvoDistroLisa.Engine\EvoDistroLisa.Engine.fsproj">
+      <Name>EvoDistroLisa.Engine</Name>
+      <Project>{60eeca86-ca2d-40a4-8688-dc9225126d2d}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\EvoDistroLisa.Pickler\EvoDistroLisa.Pickler.fsproj">
       <Name>EvoDistroLisa.Pickler</Name>
       <Project>{982fe8e5-c34e-4991-b6bc-773ae39bacf1}</Project>
@@ -102,7 +102,9 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Import Project="..\.paket\paket.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>call $(ProjectDir)\..\resources\pull.cmd $(PlatformName) libzmq.dll</PreBuildEvent>
+  </PropertyGroup>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
       <ItemGroup>
@@ -114,7 +116,4 @@
       </ItemGroup>
     </When>
   </Choose>
-  <PropertyGroup>
-    <PreBuildEvent>call $(ProjectDir)\..\resources\pull.cmd $(PlatformName) libzmq.dll</PreBuildEvent>
-  </PropertyGroup>
 </Project>
