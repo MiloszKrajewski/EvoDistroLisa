@@ -1,19 +1,32 @@
 #r "packages/FAKE/tools/FakeLib.dll"
 open Fake
+open Fake.Testing
+
+let testDir = "./../out/test"
+let buildDir = "./../out/build"
 
 Target "Clean" (fun _ ->
-    !! "**/bin"
-    ++ "**/obj"
+    !! "**/bin" 
+    ++ "**/obj" 
+    |> CleanDirs
+
+    [testDir; buildDir] 
     |> CleanDirs
 )
 
-Target "Default" (fun _ -> 
+Target "Build" (fun _ -> 
     !! "*.sln"
-    |> MSBuildRelease null "Build"
-    |> Log "Solution: "
+    |> MSBuildRelease buildDir "Build"
+    |> Log "Build-Output: "
 )
 
-"Clean"
-    ==> "Default"
+Target "Test" (fun _ ->
+    !! "*.sln"
+    |> MSBuildDebug testDir "Build"
+    |> Log "Test-Output: "
+    
+    !! (testDir @@ "*.Tests.dll")
+    |> xUnit2 id
+)
 
-RunTargetOrDefault "Default"
+RunTargetOrDefault "Build"
