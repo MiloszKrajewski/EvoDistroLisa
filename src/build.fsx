@@ -2,16 +2,14 @@
 open Fake
 open Fake.Testing
 
-let testDir = "./../out/test"
-let buildDir = "./../out/build"
+let outDir = "./../out"
+let testDir = outDir @@ "test"
+let buildDir = outDir @@ "build"
+let releaseDir = outDir @@ "release"
 
 Target "Clean" (fun _ ->
-    !! "**/bin" 
-    ++ "**/obj" 
-    |> CleanDirs
-
-    [testDir; buildDir] 
-    |> CleanDirs
+    !! "**/bin" ++ "**/obj" |> CleanDirs
+    "./../out" |> DeleteDir
 )
 
 Target "Build" (fun _ -> 
@@ -27,6 +25,12 @@ Target "Test" (fun _ ->
     
     !! (testDir @@ "*.Tests.dll")
     |> xUnit2 id
+)
+
+Target "Release" (fun _ ->
+    !! "EvoDistroLisa/EvoDistroLisa.csproj"
+    |> MSBuildRelease (releaseDir @@ "gui") "Rebuild"
+    |> Log "Release-GUI-Output: "
 )
 
 RunTargetOrDefault "Build"
