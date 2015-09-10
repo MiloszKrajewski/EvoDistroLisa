@@ -1,2 +1,2 @@
 # EvoDistroLisa
-Roger Alsing's EvoLisa reborn (with F# and ZMQ)
+Roger Johansson's (aka Roger Alsing) EvoLisa reborn (with F# and ZMQ)
