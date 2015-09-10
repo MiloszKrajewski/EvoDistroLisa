@@ -1,0 +1,8 @@
+﻿<Window x:Class="EvoDistroLisa.UI.ImageViewer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ImageViewer" Height="300" Width="300">
+    <Grid Margin="8">
+        <Image Margin="8" DataContext="{Binding Path=Image}"/>
+    </Grid>
+</Window>
