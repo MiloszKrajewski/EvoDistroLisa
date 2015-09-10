@@ -28,9 +28,9 @@ Target "Test" (fun _ ->
 )
 
 Target "Release" (fun _ ->
-    !! "EvoDistroLisa/EvoDistroLisa.csproj"
-    |> MSBuildRelease (releaseDir @@ "gui") "Rebuild"
-    |> Log "Release-GUI-Output: "
+    !! "EvoDistroLisa.CLI\EvoDistroLisa.CLI.fsproj"
+    |> MSBuildRelease (releaseDir @@ "cli") "Release"
+    |> Log "Release-Output: "
 )
 
 RunTargetOrDefault "Build"
