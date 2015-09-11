@@ -3,6 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="ImageViewer" Height="300" Width="300" Closing="Window_Closing">
     <Grid Margin="8">
-        <Image Margin="8" DataContext="{Binding Path=Image}"/>
+        <Image Margin="8" Source="{Binding Path=Image}"/>
     </Grid>
 </Window>

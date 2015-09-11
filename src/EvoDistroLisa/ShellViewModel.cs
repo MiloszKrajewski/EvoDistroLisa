@@ -44,8 +44,7 @@ namespace EvoDistroLisa
 		{
 			var token = new CancellationTokenSource();
 
-			var imgPath = Path.Combine(Environment.CurrentDirectory, "monalisa.orig.bmp");
-			// var imgPath = Path.Combine(Environment.CurrentDirectory, "fsharp.png");
+			var imgPath = Path.Combine(Environment.CurrentDirectory, "monalisa.png");
 			var evoPath = imgPath + ".evoboot";
 
 			Scene.Pixels pixels;
