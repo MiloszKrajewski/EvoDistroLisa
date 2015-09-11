@@ -12,8 +12,8 @@ module Settings =
     let pointMoveMinRate = 1500.0
 
     let pointXYRange = (0.0, 1.0)
-    let pointMoveMinRange = (-0.02, 0.02)
-    let pointMoveMidRange = (-0.08, 0.08)
+    let pointMoveMinRange = (-0.015, 0.015)
+    let pointMoveMidRange = (-0.1, 0.1)
 
     let polygonInsertPointRate = 1500.0
     let polygonDeletePointRate = 1500.0
@@ -21,6 +21,6 @@ module Settings =
 
     let sceneInsertPolygonRate = 700.0
     let sceneDeletePolygonRate = 1500.0
-    let sceneMovePolygonRate = 1500.0
+    let sceneMovePolygonRate = 700.0
 
     let sceneSizeRange = (0, 256)

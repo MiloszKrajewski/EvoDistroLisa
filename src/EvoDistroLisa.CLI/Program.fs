@@ -32,26 +32,27 @@ module Agent =
         )
         master
     
-    let attachGui token (agent: IAgent) = 
+    let attachGui (token: CancellationToken) (agent: IAgent) = 
         UI.invoke (fun () -> 
             let pixels = agent.Pixels
             let width, height = pixels.Width, pixels.Height
             let dispatcher = DispatcherScheduler.Current
-            let sampling = TimeSpan.FromMilliseconds(1000.0)
+            let fps = 10.0
+            let sampling = TimeSpan.FromSeconds(1.0/fps)
             let window = ImageViewer()
             let target = RenderTargetBitmap(width, height, 96.0, 96.0, PixelFormats.Pbgra32)
             window.DataContext <- window
             window.Show()
 
-            agent.Improved 
-            |> Observable.sample sampling
+            agent.Best
+            |> Observable.single
+            |> Observable.merge (agent.Improved |> Observable.sample sampling)
             |> Observable.observeOn dispatcher
             |> Observable.subscribe (fun scene ->
                 let fitness = scene.Fitness
                 let scene = scene.Scene
                 window.Image <- WpfRender.render target scene
-                window.Title <- sprintf "%g" fitness
-            )
+                window.Title <- sprintf "%g" fitness)
             |> ignore
         )
 

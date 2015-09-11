@@ -131,11 +131,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="krash-sp-avatar-512.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="monalisa.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

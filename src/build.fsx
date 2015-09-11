@@ -31,6 +31,10 @@ Target "Release" (fun _ ->
     !! "EvoDistroLisa.CLI\EvoDistroLisa.CLI.fsproj"
     |> MSBuildReleaseExt (releaseDir @@ "cli") [ "Platform", "x64"; "AllowUnsafeBlocks", "true" ] "Rebuild"
     |> Log "Release-Output: "
+    
+    !! "EvoLisa.original\EvoLisa.sln"
+    |> MSBuildRelease (releaseDir @@ "orig") "Rebuild"
+    |> Log "Release-Output: "
 )
 
 RunTargetOrDefault "Build"
