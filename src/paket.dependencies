@@ -4,7 +4,6 @@ nuget Argu framework: >= net45
 nuget Caliburn.Micro.Start framework: >= net45
 nuget Rx-Main framework: >= net45
 nuget Rx-WPF framework: >= net45
-nuget Rx-WinForms framework: >= net45
 nuget FSharp.Control.Reactive framework: >= net45
 nuget FSharp.Collections.ParallelSeq framework: >= net45
 nuget FsPickler >= 1.3.7 framework: >= net45

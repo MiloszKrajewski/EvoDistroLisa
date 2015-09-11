@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace EvoDistroLisa.UI
@@ -25,6 +26,12 @@ namespace EvoDistroLisa.UI
 				_image = value;
 				PropertyChanged(this, new PropertyChangedEventArgs("Image"));
 			}
+		}
+
+		private void Window_Closing(object sender, CancelEventArgs e)
+		{
+			e.Cancel = true;
+			WindowState = WindowState.Minimized;
 		}
 	}
 }

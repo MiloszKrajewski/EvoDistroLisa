@@ -194,11 +194,13 @@ Global
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Debug|x64.Build.0 = Debug|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|x64.ActiveCfg = Release|Any CPU
+		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -36,8 +36,6 @@ NUGET
     Rx-PlatformServices (2.2.5)
       Rx-Core (>= 2.2.5)
       Rx-Interfaces (>= 2.2.5)
-    Rx-WinForms (2.2.5) - framework: >= net45
-      Rx-Main (>= 2.2.5)
     Rx-WPF (2.2.5) - framework: >= net45
       Rx-Xaml (>= 2.2.5)
     Rx-Xaml (2.2.5)

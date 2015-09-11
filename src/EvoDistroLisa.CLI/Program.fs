@@ -6,8 +6,15 @@ open System.Threading
 open System.Drawing
 
 module Agent = 
+    open EvoDistroLisa.UI
     open EvoDistroLisa.Domain
     open EvoDistroLisa.Engine
+    open FSharp.Control.Reactive
+    open System
+    open System.Reactive.Concurrency
+    open System.Windows.Media.Imaging
+    open System.Windows.Media
+    open EvoDistroLisa.Domain.Scene
 
     let attachAgents token agents (master: IAgent) = 
         let pixels = master.Pixels
@@ -25,7 +32,22 @@ module Agent =
         )
         master
     
-    let attachGui token agent = ()
+    let attachGui token (agent: IAgent) = 
+        UI.invoke (fun () -> 
+            let pixels = agent.Pixels
+            let dispatcher = DispatcherScheduler.Current
+            let sampling = TimeSpan.FromMilliseconds(1000.0/30.0) // 30fps
+            let window = ImageViewer()
+            window.Show()
+
+            agent.Improved 
+            |> Observable.sample sampling
+            |> Observable.observeOn dispatcher
+            |> Observable.subscribe (fun scene ->
+                let target = RenderTargetBitmap(pixels.Width, pixels.Height, 96.0, 96.0, PixelFormats.Pbgra32);
+                window.Image <- WpfRender.render target scene.Scene)
+            |> ignore
+        )
 
 module Server = 
     open EvoDistroLisa
@@ -72,7 +94,8 @@ module Server =
 
         let agent = ZmqServer.createServer port pixels best token 
         agent |> Agent.attachAgents token agents |> ignore
-        if gui then agent |> Agent.attachGui token 
+
+        if gui then agent |> Agent.attachGui token
 
         printfn "Listening at %d..." port
 
@@ -82,6 +105,7 @@ module Server =
 
 module Client = 
     open EvoDistroLisa.Engine.ZMQ
+    open EvoDistroLisa.Domain.Scene
 
     type Arguments = 
         | Connect of host: string * port: int
@@ -127,10 +151,13 @@ module Program =
     [<EntryPoint>]
     let main (argv: string[]) = 
         try
-            match argv |> List.ofSeq with
-            | "server" :: t -> Server.start t
-            | "client" :: t -> Client.start t
-            | l -> startHelp l
-            0
-        with 
-        | e -> e |> printfn "%A"; -1
+            UI.startup ()
+            try
+                match argv |> List.ofSeq with
+                | "server" :: t -> Server.start t
+                | "client" :: t -> Client.start t
+                | l -> startHelp l
+                0
+            finally
+                UI.shutdown ()
+        with e -> e |> printfn "%A"; -1

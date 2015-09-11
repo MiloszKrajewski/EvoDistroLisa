@@ -19,8 +19,8 @@ module UI =
         thread.Start()
         signal.Wait()
 
-    let shutdown () = 
-        applicationRef.Value.Shutdown()
-
-    let invoke func = 
+    let invoke (func: unit -> 'a) = 
         applicationRef.Value.Dispatcher.Invoke(func)
+
+    let shutdown () = 
+        invoke (fun () -> applicationRef.Value.Shutdown())
