@@ -14,7 +14,7 @@ module Agent =
         | Challenger of RenderedScene
 
     [<Literal>] 
-    let private mutationsInterval = 1024L
+    let private mutationsInterval = 16L
 
     /// Choses better scene depending on fitness with bias for current champion.
     let private selectScene champion challengers =

@@ -56,6 +56,14 @@ module Agent =
             |> ignore
         )
 
+        agent.Improved
+        |> Observable.sample (TimeSpan.FromSeconds(1.0))
+        |> Observable.subscribe (fun scene ->
+            let polygons = scene.Scene.Polygons.Length
+            let mutations = agent.Mutations
+            printfn "Polygons: %d; Mutations: %d" polygons mutations)
+        |> ignore
+
 module Server = 
     open EvoDistroLisa
     open EvoDistroLisa.Engine

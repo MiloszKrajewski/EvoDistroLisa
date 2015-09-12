@@ -88,18 +88,25 @@ module Polygon =
         let count = rng () |> Random.toInt32 polygonSizeRange
         Array.init count (fun _ -> createPoint rng)
 
-    let createPolygon rng =
+    let createLargePolygon rng =
         { Brush = createBrush rng; Points = createPoints rng }
+
+    let createSmallPolygon rng =
+        let point = createPoint rng
+        let move p = p |> movePoint rng Settings.pointMoveMinRange
+        let result = { Brush = createBrush rng; Points = [| move point; move point; move point |] }
+        result
 
     let insertPoint dirty rng rate points =
         let length = Array.length points
         if length < maximumPolygonSize && allow rng rate then
             dirty |> Flag.set
-            let index = rng () |> Random.toInt32 (0, length)
-            let this = Array.get points ((index + 0) % length)
-            let next = Array.get points ((index + 1) % length)
-            let mid = { X = this.X + next.X / 2.0; Y = this.Y + next.Y / 2.0 }
-            points |> Array.insert index mid
+            let index0 = rng () |> Random.toInt32 (0, length - 1)
+            let index1 = (index0 + 1) % length
+            let this = Array.get points index0
+            let next = Array.get points index1
+            let mid = { X = this.X + next.X / 2.0; Y = this.Y + next.Y / 2.0 } |> mutatePoint dirty rng
+            points |> Array.insert index1 mid
         else
             points
 
@@ -163,14 +170,14 @@ module Scene =
 
     let createScene rng =
         let count = rng () |> Random.toInt32 sceneSizeRange
-        { Polygons = Array.init count (fun _ -> createPolygon rng) }
+        { Polygons = Array.init count (fun _ -> createSmallPolygon rng) }
 
     let insertPolygon dirty rng scene =
         let length = Array.length scene.Polygons
         if length < maximumSceneSize && allow rng insertPolygonRate then
             dirty |> Flag.set
             let index = rng () |> Random.toInt32 (0, length)
-            { scene with Polygons = scene.Polygons |> Array.insert index (createPolygon rng) }
+            { scene with Polygons = scene.Polygons |> Array.insert index (createSmallPolygon rng) }
         else
             scene
 
