@@ -5,13 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>34d402a5-a886-4c15-9d5b-692957b20a37</ProjectGuid>
+    <ProjectGuid>d68ad72c-fd8b-4661-932f-d4112168f001</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>EvoDistroLisa.Engine.WPF</RootNamespace>
-    <AssemblyName>EvoDistroLisa.Engine.WPF</AssemblyName>
+    <RootNamespace>EvoDistroLisa.Engine.WBx</RootNamespace>
+    <AssemblyName>EvoDistroLisa.Engine.WBx</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>EvoDistroLisa.Engine.WPF</Name>
+    <Name>EvoDistroLisa.Engine.WBx</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\EvoDistroLisa.Engine.WPF.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\EvoDistroLisa.Engine.WBx.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,7 +30,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\EvoDistroLisa.Engine.WPF.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\EvoDistroLisa.Engine.WBx.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -63,6 +63,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\EvoDistroLisa.Domain\EvoDistroLisa.Domain.fsproj">
       <Name>EvoDistroLisa.Domain</Name>
       <Project>{f2b7b731-0f91-435a-bac7-f78b49eb83a9}</Project>
@@ -86,4 +88,70 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETCore'">
+      <ItemGroup>
+        <Reference Include="WriteableBitmapEx.WinRT">
+          <HintPath>..\packages\WriteableBitmapEx\lib\NetCore45\WriteableBitmapEx.WinRT.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
+      <ItemGroup>
+        <Reference Include="WriteableBitmapEx.Wpf">
+          <HintPath>..\packages\WriteableBitmapEx\lib\net40\WriteableBitmapEx.Wpf.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'Silverlight' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v5.0')">
+      <ItemGroup>
+        <Reference Include="WriteableBitmapEx">
+          <HintPath>..\packages\WriteableBitmapEx\lib\sl4\WriteableBitmapEx.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'WindowsPhone' And $(TargetFrameworkVersion) == 'v7.1'">
+      <ItemGroup>
+        <Reference Include="WriteableBitmapExWinPhone">
+          <HintPath>..\packages\WriteableBitmapEx\lib\sl4-wp71\WriteableBitmapExWinPhone.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="WriteableBitmapExWinPhoneXnaDependant">
+          <HintPath>..\packages\WriteableBitmapEx\lib\sl4-wp71\WriteableBitmapExWinPhoneXnaDependant.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'WindowsPhone' And ($(TargetFrameworkVersion) == 'v8.0' Or $(TargetFrameworkVersion) == 'v8.1')">
+      <ItemGroup>
+        <Reference Include="WriteableBitmapExWinPhone">
+          <HintPath>..\packages\WriteableBitmapEx\lib\WindowsPhone8\WriteableBitmapExWinPhone.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="WriteableBitmapExWinPhoneXnaDependant">
+          <HintPath>..\packages\WriteableBitmapEx\lib\WindowsPhone8\WriteableBitmapExWinPhoneXnaDependant.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'WindowsPhoneApp'">
+      <ItemGroup>
+        <Reference Include="WriteableBitmapEx.WinRT">
+          <HintPath>..\packages\WriteableBitmapEx\lib\wpa81\WriteableBitmapEx.WinRT.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
 </Project>

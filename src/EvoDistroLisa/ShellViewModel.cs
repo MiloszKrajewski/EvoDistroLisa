@@ -108,8 +108,8 @@ namespace EvoDistroLisa
 				pixels,
 				Agent.createMutator(),
 				// FuncConvert.ToFSharpFunc<Scene.Scene, Scene.Scene>(Mutate),
-				WpfFitness.createRendererFactory(),
-				// Win32Fitness.createRendererFactory(true),
+				// WpfFitness.createRendererFactory(),
+				Win32Fitness.createRendererFactory(true),
 				scene0,
 				token.Token);
 
@@ -161,12 +161,14 @@ namespace EvoDistroLisa
 				.ObserveOn(DispatcherScheduler.Current)
 				.Subscribe(m => Speed = string.Format("{0}/{1}", m, agent0.Best.Scene.Polygons.Length));
 
+			RenderTargetBitmap target = null;
 			agent0.Improved
-				.Sample(TimeSpan.FromMilliseconds(200))
+				//.Sample(TimeSpan.FromMilliseconds(200))
 				.ObserveOn(DispatcherScheduler.Current)
 				.Subscribe(rendered => {
+					if (target == null)
+						target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
 					var scene = rendered.Scene;
-					var target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
 					WpfRender.render(target, scene);
 					Image = target;
 				});

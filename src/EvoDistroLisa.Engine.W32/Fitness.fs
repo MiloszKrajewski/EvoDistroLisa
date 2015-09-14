@@ -49,7 +49,8 @@ module Win32Fitness =
         { 0 .. height - 1 } 
         |> PSeq.averageBy (fitRgb32Row original rendered.Scan0 width)
 
-    let private serialFitRgb32Image (original: uint32[]) (rendered: BitmapData) =
+    let private serialFitRgb32Image width (original: uint32[]) (rendered: BitmapData) =
+        assert (width*sizeof<uint32> = rendered.Stride)
         fitRgb32Row original rendered.Scan0 original.Length 0
 
     let createPixels (original: Image) =
@@ -59,7 +60,7 @@ module Win32Fitness =
 
     let createRenderer serial (original: Pixels) =
         let { Width = width; Height = height; Pixels = pixels } = original
-        let fitter = (if serial then serialFitRgb32Image else parallelFitRgb32Image height width) pixels
+        let fitter = (if serial then serialFitRgb32Image width else parallelFitRgb32Image height width) pixels
         let target = new Bitmap(width, height, format)
         let fitness (scene: Scene) = 
             Win32Renderer.render target scene

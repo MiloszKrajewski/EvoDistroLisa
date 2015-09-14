@@ -26,7 +26,7 @@ module Win32Renderer =
         ctx.FillPolygon(brush, points)
 
     let renderScene (extent: Rectangle) (ctx: Graphics) (scene: Scene) =
-        use zeroBrush = (1, 0.5, 0.5, 0.5) |> createColor |> createBrush
+        use zeroBrush = (1, 0.0, 0.0, 0.0) |> createColor |> createBrush
         ctx.FillRectangle(zeroBrush, extent)
         scene.Polygons |> Seq.iter (renderPolygon extent ctx)
 
