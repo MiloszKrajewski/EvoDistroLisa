@@ -32,12 +32,13 @@ module Brush =
         let inline mutateRed brush = { brush with R = createColor rng }
         let inline mutateGreen brush = { brush with G = createColor rng }
         let inline mutateBlue brush = { brush with B = createColor rng }
+        let mutate = mutate dirty rng
 
         brush 
-        |> mutate dirty rng alphaRate mutateAlpha 
-        |> mutate dirty rng colorRate mutateRed
-        |> mutate dirty rng colorRate mutateGreen
-        |> mutate dirty rng colorRate mutateBlue
+        |> mutate alphaRate mutateAlpha 
+        |> mutate colorRate mutateRed
+        |> mutate colorRate mutateGreen
+        |> mutate colorRate mutateBlue
 
 module Point =
     open FSharp.Fx
@@ -60,6 +61,9 @@ module Point =
     let movePoint rng range point =
         let inline move v = (rng () |> Random.toFloat range) + v |> cap maxXYRange
         { point with X = move point.X; Y = move point.Y }
+
+    let fiddlePoint rng point =
+        movePoint rng minMoveRange point
 
     let mutatePoint dirty rng point =
         let inline mutateMax _ = createPoint rng
@@ -93,9 +97,8 @@ module Polygon =
 
     let createSmallPolygon rng =
         let point = createPoint rng
-        let move p = p |> movePoint rng Settings.pointMoveMinRange
-        let result = { Brush = createBrush rng; Points = [| move point; move point; move point |] }
-        result
+        let points = Seq.init 3 (fun _ -> point |> fiddlePoint rng)
+        { Brush = createBrush rng; Points = points |> Array.ofSeq }
 
     let insertPoint dirty rng rate points =
         let length = Array.length points
@@ -103,9 +106,11 @@ module Polygon =
             dirty |> Flag.set
             let index0 = rng () |> Random.toInt32 (0, length - 1)
             let index1 = (index0 + 1) % length
-            let this = Array.get points index0
-            let next = Array.get points index1
-            let mid = { X = this.X + next.X / 2.0; Y = this.Y + next.Y / 2.0 } |> mutatePoint dirty rng
+            let this = points.[index0]
+            let next = points.[index1]
+            let mid = 
+                { X = this.X + next.X / 2.0; Y = this.Y + next.Y / 2.0 } 
+                |> fiddlePoint rng
             points |> Array.insert index1 mid
         else
             points
@@ -151,26 +156,9 @@ module Scene =
     let minimumSceneSize, maximumSceneSize = sceneSizeRange
 
     type Pixels = { Width: int; Height: int; Pixels: uint32[] }
-    type Scene = { Polygons: Polygon array }
-    type RenderedScene = { Scene: Scene; Fitness: double }
-    type BootstrapScene = { Pixels: Pixels; Scene: RenderedScene }
-
-    let emptyScene = { Polygons = Array.empty }
-    let initialScene = { Scene = emptyScene; Fitness = 0.0 }
-
-    let testScene =
-        let points = 
-            [ (0.1, 0.1); (0.5, 0.9); (0.9, 0.5) ] 
-            |> Seq.map (fun (x, y) -> { X = x; Y = y })
-        let polygon = { 
-            Points = points |> Seq.toArray
-            Brush = { A = 1.0; R = 0.5; G = 0.0; B = 1.0 } 
-        }
-        { Polygons = [| polygon |] }
-
-    let createScene rng =
-        let count = rng () |> Random.toInt32 sceneSizeRange
-        { Polygons = Array.init count (fun _ -> createSmallPolygon rng) }
+    type Scene = 
+        { Polygons: Polygon array; Cargo: obj }
+        static member Zero = { Polygons = Array.empty; Cargo = null }
 
     let insertPolygon dirty rng scene =
         let length = Array.length scene.Polygons

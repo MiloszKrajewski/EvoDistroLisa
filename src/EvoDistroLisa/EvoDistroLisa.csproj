@@ -124,6 +124,10 @@
       <Project>{982fe8e5-c34e-4991-b6bc-773ae39bacf1}</Project>
       <Name>EvoDistroLisa.Pickler</Name>
     </ProjectReference>
+    <ProjectReference Include="..\EvoLisa.original\Core\GenArt.Core.csproj">
+      <Project>{e4df4818-a171-41e0-9ac4-4fdb8af6482a}</Project>
+      <Name>GenArt.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="fsharp.png">

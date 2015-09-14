@@ -4,13 +4,12 @@ module ZmqClient =
     open System.Threading
     open fszmq
     open FSharp.Fx
+    open EvoDistroLisa.Domain
     open EvoDistroLisa.Domain.Scene
     open EvoDistroLisa.Engine
     open EvoDistroLisa.Engine.ZMQ.Message
 
-    type private Message = EvoDistroLisa.Engine.ZMQ.Message.Message
-
-    let createClient 
+    let createClient<'scene>
             addr port 
             (token: CancellationToken) = 
 

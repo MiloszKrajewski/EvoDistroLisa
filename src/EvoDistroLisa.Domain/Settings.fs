@@ -4,7 +4,7 @@ module Settings =
     let brushAlphaRate = 1500.0
     let brushColorRate = 1500.0
 
-    let brushAlphaRange = (0.1, 0.25)
+    let brushAlphaRange = (0.05, 0.25)
     let brushColorRange = (0.0, 1.0)
 
     let pointMoveMaxRate = 1500.0

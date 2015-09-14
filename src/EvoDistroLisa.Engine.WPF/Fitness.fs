@@ -18,7 +18,7 @@ module WpfFitness =
         let length = width*height
         let sumdev = Fitness.SumDev(original, 0, rendered, 0, length)
         let maxdev = 255uL*255uL*3uL*(uint64 length)
-        float sumdev / float maxdev
+        decimal sumdev / decimal maxdev
 
     let sync (image: #DispatcherObject) func =
         image.Dispatcher.Invoke(Func<_>(fun () -> func image))
@@ -57,7 +57,7 @@ module WpfFitness =
                 |> WpfRender.render targetBitmap 
                 |> bitmapToBytes (Some targetPixels)
                 |> fitPbgraImage height width sourcePixels
-            1.0 - distance
+            1m - distance
         fitness
 
     let createRendererFactory () = createRenderer

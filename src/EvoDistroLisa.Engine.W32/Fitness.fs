@@ -43,7 +43,7 @@ module Win32Fitness =
     let private fitRgb32Row (original: uint32[]) (rendered: nativeint) width y =
         let sumdev = Fitness.SumDev(original, y * width, rendered, y * width, width)
         let maxdev = 255uL*255uL*3uL*(uint64 width)
-        float sumdev / float maxdev
+        decimal sumdev / decimal maxdev
 
     let private parallelFitRgb32Image height width (original: uint32[]) (rendered: BitmapData) =
         { 0 .. height - 1 } 
@@ -65,7 +65,7 @@ module Win32Fitness =
             Win32Renderer.render target scene
             target |> lockBits ImageLockMode.ReadOnly (fun data ->
                 let distance = data |> fitter
-                1.0 - distance)
+                1m - distance)
         fitness
 
     let createRendererFactory serial = createRenderer serial

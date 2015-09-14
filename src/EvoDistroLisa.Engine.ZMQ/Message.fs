@@ -2,7 +2,7 @@
 
 module Message = 
     open EvoDistroLisa
-    open EvoDistroLisa.Domain.Scene
+    open EvoDistroLisa.Domain
 
     type Message =
         | Handshake

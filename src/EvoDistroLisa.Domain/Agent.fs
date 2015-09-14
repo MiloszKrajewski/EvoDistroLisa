@@ -3,6 +3,13 @@
 open System
 open Scene
 
+type RenderedScene = 
+    { Scene: Scene; Fitness: decimal }
+    static member Zero = { Scene = Scene.Zero; Fitness = 0m }
+
+type BootstrapScene = 
+    { Pixels: Pixels; Scene: RenderedScene }
+
 [<Interface>]
 type IAgent = 
     abstract member Push: int64 -> unit

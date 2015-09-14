@@ -34,7 +34,8 @@ module WpfRender =
         ctx.DrawGeometry(brush, pen, geometry)
 
     let private renderScene (extent: Rect) (ctx: DrawingContext) (scene: Scene) =
-        let zeroBrush = (1, 0.5, 0.5, 0.5) |> createColor |> createBrush
+        // let zeroBrush = (1, 0.5, 0.5, 0.5) |> createColor |> createBrush
+        let zeroBrush = (1, 0, 0, 0) |> createColor |> createBrush
         let zeroPen = zeroBrush |> createPen 0
         ctx.DrawRectangle(zeroBrush, zeroPen, extent)
         scene.Polygons |> Seq.iter (renderPolygon extent ctx)

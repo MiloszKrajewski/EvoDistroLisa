@@ -23,7 +23,7 @@ module Agent =
             let mutator = Agent.createMutator ()
             let renderer = 
                 match index with
-                | 1 -> Win32Fitness.createRendererFactory (agents > 1)
+                // | 1 -> Win32Fitness.createRendererFactory (agents > 1)
                 | _ -> WpfFitness.createRendererFactory ()
             let agent = Agent.createAgent pixels mutator renderer best token
             master |> Agent.attachAgent agent 
@@ -68,6 +68,7 @@ module Server =
     open EvoDistroLisa
     open EvoDistroLisa.Engine
     open EvoDistroLisa.Engine.ZMQ
+    open EvoDistroLisa.Domain
     open EvoDistroLisa.Domain.Scene
 
     type Arguments = 
@@ -98,7 +99,7 @@ module Server =
 
         let { Pixels = pixels; Scene = best } = 
             match mode with
-            | Restart fn -> { Pixels = Image.FromFile(fn) |> Win32Fitness.createPixels; Scene = initialScene }
+            | Restart fn -> { Pixels = Image.FromFile(fn) |> Win32Fitness.createPixels; Scene = RenderedScene.Zero }
             | Resume fn -> File.ReadAllBytes(fn) |> Pickler.load<BootstrapScene>
             | _ -> mode |> sprintf "Unexpected mode: %A" |> failwith
 

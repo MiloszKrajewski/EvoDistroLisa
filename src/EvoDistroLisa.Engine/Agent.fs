@@ -10,7 +10,7 @@ module Agent =
     type private Agent<'a> = MailboxProcessor<'a>
 
     type private BestScene = 
-        | Champion of RenderedScene 
+        | Champion of RenderedScene
         | Challenger of RenderedScene
 
     [<Literal>] 
@@ -28,13 +28,10 @@ module Agent =
         let rng = Random.createSequential ()
         fun scene ->
             let dirty = Flag.create ()
-            let rec loop retries = 
+            let rec loop () = 
                 let result = mutateScene dirty rng scene
-                match retries, dirty |> Flag.get with
-                | _, true -> result
-                | r, _ when r <= 0 -> result 
-                | _ -> loop (retries - 1)
-            loop 1024
+                match dirty |> Flag.get with | true -> result | _ -> loop ()
+            loop ()
 
     let createPassiveAgent 
             (pixels: Pixels)
@@ -79,10 +76,10 @@ module Agent =
                 member x.Mutations = Interlocked.getLong mutationCount
         }
 
-    let createAgent 
+    let createAgent
             (pixels: Pixels)
             (mutate: Scene -> Scene) 
-            (render: Pixels -> Scene -> float) 
+            (render: Pixels -> Scene -> decimal) 
             (best: RenderedScene)
             (token: CancellationToken) =
 
@@ -108,9 +105,9 @@ module Agent =
 
         let grind = 
             let publishImproved (scene: RenderedScene) =
-                let clone = { scene with Scene = scene.Scene |> cloneScene }
-                bestScene |> Interlocked.setRef clone |> ignore
-                clone |> forgive (trigger improvedEvent) |> ignore
+                // let clone = { scene with Scene = scene.Scene |> cloneScene }
+                let clone = scene
+                bestScene |> Interlocked.setRef clone |> forgive (trigger improvedEvent) |> ignore
                 scene
 
             let publishMutated count =
