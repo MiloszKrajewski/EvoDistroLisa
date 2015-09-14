@@ -41,6 +41,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "EvoDistroLisa.CLI", "EvoDis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvoDistroLisa.UI", "EvoDistroLisa.UI\EvoDistroLisa.UI.csproj", "{213C80F2-80B2-4284-B88D-FBED58DC331D}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.Fx.Tests", "FSharp.Fx.Tests\FSharp.Fx.Tests.fsproj", "{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +203,16 @@ Global
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|x64.ActiveCfg = Release|Any CPU
 		{213C80F2-80B2-4284-B88D-FBED58DC331D}.Release|x64.Build.0 = Release|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -219,5 +231,6 @@ Global
 		{24BC963C-8B51-4FB3-8F1D-3D67D3C85D09} = {0A963383-9FC5-4772-8FB1-1795421BDD77}
 		{DDEA5109-2A23-41F5-91E5-3D9FE7B0522F} = {4E55DC3E-881E-4D9D-8C26-4E89024BD51D}
 		{213C80F2-80B2-4284-B88D-FBED58DC331D} = {0A963383-9FC5-4772-8FB1-1795421BDD77}
+		{72E73ABA-31C0-4453-B69D-5C5CDF1E6458} = {0A963383-9FC5-4772-8FB1-1795421BDD77}
 	EndGlobalSection
 EndGlobal
