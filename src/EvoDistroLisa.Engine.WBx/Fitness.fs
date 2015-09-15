@@ -1,4 +1,6 @@
-﻿namespace EvoDistroLisa.Engine
+﻿#nowarn "9"
+
+namespace EvoDistroLisa.Engine
 
 module WBxFitness =
     open System
@@ -9,14 +11,16 @@ module WBxFitness =
     open EvoDistroLisa.Domain
     open EvoDistroLisa.Domain.Scene
     open EvoDistroLisa.Engine.Unsafe
+    open Microsoft.FSharp.NativeInterop
 
     let private format = PixelFormats.Pbgra32
 
-    let private fitPbgraImage height width (original: uint32[]) (rendered: uint32[]) =
-        assert (original.Length = rendered.Length)
-        assert (original.Length = height * width)
+    let private fitPbgraImage height width (original: uint32[]) (rendered: WriteableBitmap) =
         let length = width*height
-        let sumdev = Fitness.SumDev(original, 0, rendered, 0, length)
+        assert (rendered.PixelWidth * rendered.PixelHeight = length)
+        assert (original.Length = length)
+        use context = rendered.GetBitmapContext()
+        let sumdev = Fitness.SumDev(original, 0, context.Pixels |> NativePtr.toNativeInt, 0, length)
         let maxdev = 255uL*255uL*3uL*(uint64 length)
         decimal sumdev / decimal maxdev
 
@@ -54,7 +58,6 @@ module WBxFitness =
             let distance = 
                 scene 
                 |> WBxRender.render targetBitmap 
-                |> bitmapToBytes (Some targetPixels)
                 |> fitPbgraImage height width sourcePixels
             1m - distance
         fitness

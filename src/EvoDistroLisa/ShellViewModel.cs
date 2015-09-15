@@ -106,8 +106,8 @@ namespace EvoDistroLisa
 
 			var agent0 = Agent.createAgent(
 				pixels,
-				Agent.createMutator(),
-				// FuncConvert.ToFSharpFunc<Scene.Scene, Scene.Scene>(Mutate),
+				// Agent.createMutator(),
+				FuncConvert.ToFSharpFunc<Scene.Scene, Scene.Scene>(Mutate),
 				// WpfFitness.createRendererFactory(),
 				Win32Fitness.createRendererFactory(true),
 				// WBxFitness.createRendererFactory(),
@@ -162,29 +162,23 @@ namespace EvoDistroLisa
 			//	.ObserveOn(DispatcherScheduler.Current)
 			//	.Subscribe(m => Speed = string.Format("{0}/{1}", m, agent0.Best.Scene.Polygons.Length));
 
-			//RenderTargetBitmap target = null;
-			//agent0.Improved
-			//	.Sample(TimeSpan.FromMilliseconds(200))
-			//	.ObserveOn(DispatcherScheduler.Current)
-			//	.Subscribe(rendered => {
-			//		if (target == null)
-			//			target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-			//		var scene = rendered.Scene;
-			//		WpfRender.render(target, scene);
-			//		Image = target;
-			//	});
-
-			WriteableBitmap target = null;
+			RenderTargetBitmap target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
 			agent0.Improved
-				.Sample(TimeSpan.FromMilliseconds(200))
+				//.Sample(TimeSpan.FromMilliseconds(200))
 				.ObserveOn(DispatcherScheduler.Current)
 				.Subscribe(rendered => {
-					if (target == null)
-						target = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
-					var scene = rendered.Scene;
-					WBxRender.render(target, scene);
+					WpfRender.render(target, rendered.Scene);
 					Image = target;
 				});
+
+			//var target = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
+			//agent0.Improved
+			//	//.Sample(TimeSpan.FromMilliseconds(1000))
+			//	.ObserveOn(DispatcherScheduler.Current)
+			//	.Subscribe(rendered => {
+			//		WBxRender.render(target, rendered.Scene);
+			//		Image = target;
+			//	});
 
 			agent0.Push(scene0);
 		}
