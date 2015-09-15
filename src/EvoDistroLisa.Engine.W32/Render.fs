@@ -14,6 +14,8 @@ module Win32Renderer =
     let inline private createColor (a, r, g, b) = Color.FromArgb(toByte a, toByte r, toByte g, toByte b)
     let inline private createBrush color = new SolidBrush(color)
 
+    let private zeroColor = (1, 0.5, 0.5, 0.5) |> createColor
+
     let renderPolygon (extent: Rectangle) (ctx: Graphics) (polygon: Polygon) =
         use brush = 
             let b = polygon.Brush
@@ -26,7 +28,7 @@ module Win32Renderer =
         ctx.FillPolygon(brush, points)
 
     let renderScene (extent: Rectangle) (ctx: Graphics) (scene: Scene) =
-        use zeroBrush = (1, 0.0, 0.0, 0.0) |> createColor |> createBrush
+        use zeroBrush = zeroColor |> createBrush
         ctx.FillRectangle(zeroBrush, extent)
         scene.Polygons |> Seq.iter (renderPolygon extent ctx)
 

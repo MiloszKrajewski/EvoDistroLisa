@@ -110,6 +110,7 @@ namespace EvoDistroLisa
 				// FuncConvert.ToFSharpFunc<Scene.Scene, Scene.Scene>(Mutate),
 				// WpfFitness.createRendererFactory(),
 				Win32Fitness.createRendererFactory(true),
+				// WBxFitness.createRendererFactory(),
 				scene0,
 				token.Token);
 
@@ -146,30 +147,42 @@ namespace EvoDistroLisa
 
 			var started = DateTimeOffset.Now;
 
-			//agent0.Mutated
-			//	.Select(_ => agent0.Mutations)
-			//	.Timestamp()
-			//	.Select(c => c.Value / (c.Timestamp.Subtract(started).TotalSeconds))
-			//	.SlidingAverage(c => c, TimeSpan.FromSeconds(5))
-			//	.Sample(TimeSpan.FromSeconds(1))
-			//	.ObserveOn(DispatcherScheduler.Current)
-			//	.Subscribe(args => Speed = string.Format("{0:0.0000}/s", args));
-
 			agent0.Mutated
 				.Select(_ => agent0.Mutations)
+				.Timestamp()
+				.Select(c => c.Value / (c.Timestamp.Subtract(started).TotalSeconds))
+				.SlidingAverage(c => c, TimeSpan.FromSeconds(5))
 				.Sample(TimeSpan.FromSeconds(1))
 				.ObserveOn(DispatcherScheduler.Current)
-				.Subscribe(m => Speed = string.Format("{0}/{1}", m, agent0.Best.Scene.Polygons.Length));
+				.Subscribe(args => Speed = string.Format("{0:0.0000}/s", args));
 
-			RenderTargetBitmap target = null;
+			//agent0.Mutated
+			//	.Select(_ => agent0.Mutations)
+			//	.Sample(TimeSpan.FromSeconds(1))
+			//	.ObserveOn(DispatcherScheduler.Current)
+			//	.Subscribe(m => Speed = string.Format("{0}/{1}", m, agent0.Best.Scene.Polygons.Length));
+
+			//RenderTargetBitmap target = null;
+			//agent0.Improved
+			//	.Sample(TimeSpan.FromMilliseconds(200))
+			//	.ObserveOn(DispatcherScheduler.Current)
+			//	.Subscribe(rendered => {
+			//		if (target == null)
+			//			target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+			//		var scene = rendered.Scene;
+			//		WpfRender.render(target, scene);
+			//		Image = target;
+			//	});
+
+			WriteableBitmap target = null;
 			agent0.Improved
-				//.Sample(TimeSpan.FromMilliseconds(200))
+				.Sample(TimeSpan.FromMilliseconds(200))
 				.ObserveOn(DispatcherScheduler.Current)
 				.Subscribe(rendered => {
 					if (target == null)
-						target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+						target = new WriteableBitmap(width, height, 96, 96, PixelFormats.Pbgra32, null);
 					var scene = rendered.Scene;
-					WpfRender.render(target, scene);
+					WBxRender.render(target, scene);
 					Image = target;
 				});
 

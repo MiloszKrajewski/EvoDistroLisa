@@ -16,6 +16,8 @@ module WpfRender =
     let inline private createBrush color = SolidColorBrush(color)
     let inline private createPen thickness brush = Pen(brush, float thickness)
 
+    let private zeroColor = (1, 0.5, 0.5, 0.5) |> createColor
+
     let private renderPolygon (rect: Rect) (ctx: DrawingContext) (polygon: Polygon) =
         let brush = 
             let b = polygon.Brush
@@ -34,8 +36,7 @@ module WpfRender =
         ctx.DrawGeometry(brush, pen, geometry)
 
     let private renderScene (extent: Rect) (ctx: DrawingContext) (scene: Scene) =
-        // let zeroBrush = (1, 0.5, 0.5, 0.5) |> createColor |> createBrush
-        let zeroBrush = (1, 0, 0, 0) |> createColor |> createBrush
+        let zeroBrush = zeroColor |> createBrush
         let zeroPen = zeroBrush |> createPen 0
         ctx.DrawRectangle(zeroBrush, zeroPen, extent)
         scene.Polygons |> Seq.iter (renderPolygon extent ctx)

@@ -108,6 +108,10 @@
       <Project>{1194365d-11bb-41d7-a4d3-6982c776c707}</Project>
       <Name>EvoDistroLisa.Engine.W32</Name>
     </ProjectReference>
+    <ProjectReference Include="..\EvoDistroLisa.Engine.WBx\EvoDistroLisa.Engine.WBx.fsproj">
+      <Project>{d68ad72c-fd8b-4661-932f-d4112168f001}</Project>
+      <Name>EvoDistroLisa.Engine.WBx</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EvoDistroLisa.Engine.WPF\EvoDistroLisa.Engine.WPF.fsproj">
       <Project>{34d402a5-a886-4c15-9d5b-692957b20a37}</Project>
       <Name>EvoDistroLisa.Engine.WPF</Name>
