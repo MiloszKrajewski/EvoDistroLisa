@@ -64,29 +64,27 @@ module Agent =
             printfn "Polygons: %d; Mutations: %d" polygons mutations)
         |> ignore
 
+    let saveJpegToBuffer (agent: IAgent) = 
+        let target = 
+            RenderTargetBitmap(agent.Pixels.Width, agent.Pixels.Height, 96.0, 96.0, PixelFormats.Pbgra32)
+        WpfRender.render target agent.Best.Scene |> ignore
+        let encoder = JpegBitmapEncoder()
+        use stream = new MemoryStream()
+        encoder.Frames.Add(BitmapFrame.Create(target))
+        encoder.Save(stream)
+        stream.ToArray()
+
 module Web = 
-    open FSharp.Fx    
     open Suave.Http
     open Suave.Http.Successful
+    open FSharp.Fx
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Engine
-    open System.Windows.Media.Imaging
-    open System.Windows.Media
     
     let start token port (agent: IAgent) = 
-        let renderer scene = 
-            let target = RenderTargetBitmap(agent.Pixels.Width, agent.Pixels.Height, 96.0, 96.0, PixelFormats.Pbgra32)
-            WpfRender.render target scene |> ignore
-            let encoder = JpegBitmapEncoder()
-            use stream = new MemoryStream()
-            encoder.Frames.Add(BitmapFrame.Create(target))
-            encoder.Save(stream)
-            stream.ToArray()
-        let app = warbler (fun _ -> agent.Best.Scene |> renderer |> ok) >>= Writers.setMimeType "image/jpeg"
+        let app = warbler (fun _ -> agent |> Agent.saveJpegToBuffer |> ok) >>= Writers.setMimeType "image/jpeg"
         let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
         Async.startThread token loop () |> ignore
         printfn "Suave listening at %d..." port
-
 
 module Server = 
     open EvoDistroLisa
