@@ -64,6 +64,30 @@ module Agent =
             printfn "Polygons: %d; Mutations: %d" polygons mutations)
         |> ignore
 
+module Web = 
+    open FSharp.Fx    
+    open Suave.Http
+    open Suave.Http.Successful
+    open EvoDistroLisa.Domain
+    open EvoDistroLisa.Engine
+    open System.Windows.Media.Imaging
+    open System.Windows.Media
+    
+    let start token port (agent: IAgent) = 
+        let renderer scene = 
+            let target = RenderTargetBitmap(agent.Pixels.Width, agent.Pixels.Height, 96.0, 96.0, PixelFormats.Pbgra32)
+            WpfRender.render target scene |> ignore
+            let encoder = JpegBitmapEncoder()
+            use stream = new MemoryStream()
+            encoder.Frames.Add(BitmapFrame.Create(target))
+            encoder.Save(stream)
+            stream.ToArray()
+        let app = warbler (fun _ -> agent.Best.Scene |> renderer |> ok) >>= Writers.setMimeType "image/jpeg"
+        let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
+        Async.startThread token loop () |> ignore
+        printfn "Suave listening at %d..." port
+
+
 module Server = 
     open EvoDistroLisa
     open EvoDistroLisa.Engine
@@ -73,6 +97,7 @@ module Server =
 
     type Arguments = 
         | Listen of port: int
+        | Suave of port: int
         | Restart of string
         | Resume of string
         | Agents of int
@@ -81,6 +106,7 @@ module Server =
             member x.Usage = 
                 match x with
                 | Listen _ -> "the port to listen (as server)"
+                | Suave _ -> "the port to listen for HTTP requests"
                 | Agents _ -> "number of agents"
                 | Restart _ -> "restart processing (requires image file)"
                 | Resume _ -> "resume processing (requires bootstrap file)"
@@ -105,19 +131,27 @@ module Server =
 
         let agents = arguments.GetResult(<@ Agents @>, 0)
         let gui = arguments.Contains(<@ Gui @>)
+        let suave = 
+            match arguments.Contains(<@ Suave @>) with 
+            | true -> arguments.GetResult(<@ Suave @>) |> Some 
+            | _ -> None
 
         let token = CancellationToken.None
 
-        let agent = ZmqServer.createServer port pixels best token 
+        let agent = ZmqServer.createServer port pixels best token
         agent |> Agent.attachAgents token agents |> ignore
 
-        if gui then agent |> Agent.attachGui token
+        printfn "Agent listening at %d..." port
 
-        printfn "Listening at %d..." port
+        if gui then 
+            agent |> Agent.attachGui token
+
+        if suave.IsSome then
+            agent |> Web.start token suave.Value
 
         while true do 
             printf "."
-            Thread.Sleep(1000)
+            Thread.Sleep(10000)
 
 module Client = 
     open EvoDistroLisa.Engine.ZMQ
@@ -149,7 +183,7 @@ module Client =
 
         while true do 
             printf "."
-            Thread.Sleep(1000)
+            Thread.Sleep(10000)
 
 module Program = 
     open System
