@@ -13,6 +13,7 @@ nuget lz4net framework: >= net45
 nuget xunit framework: >= net45
 nuget WriteableBitmapEx framework: >= net45
 nuget Caliburn.Micro.Start framework: >= net45
+
 nuget xunit.runner.console
 nuget xunit.runner.visualstudio
 nuget FAKE
