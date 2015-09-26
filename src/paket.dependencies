@@ -1,17 +1,18 @@
 source https://www.nuget.org/api/v2/
 
+nuget fszmq framework: >= net45
 nuget Argu framework: >= net45
-nuget Caliburn.Micro.Start framework: >= net45
 nuget Rx-Main framework: >= net45
 nuget Rx-WPF framework: >= net45
 nuget FSharp.Control.Reactive framework: >= net45
 nuget FSharp.Collections.ParallelSeq framework: >= net45
-nuget FsPickler >= 1.3.7 framework: >= net45
-nuget lz4net >= 1.0.5.93 framework: >= net45
-nuget fszmq ~> 12 framework: >= net45
-nuget xunit >= 2.0.0 framework: >= net45
-nuget WriteableBitmapEx framework: >= net45
+nuget FsPickler framework: >= net45
+nuget FSPickler.Json framework: >= net45
 nuget Suave framework: >= net45
+nuget lz4net framework: >= net45
+nuget xunit framework: >= net45
+nuget WriteableBitmapEx framework: >= net45
+nuget Caliburn.Micro.Start framework: >= net45
 
 nuget xunit.runner.console
 nuget xunit.runner.visualstudio

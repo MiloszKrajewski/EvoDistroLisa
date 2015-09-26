@@ -77,11 +77,17 @@ module Agent =
 module Web = 
     open Suave.Http
     open Suave.Http.Successful
+    open Suave.Http.Applicatives
     open FSharp.Fx
     open EvoDistroLisa.Domain
+    open Nessos.FsPickler.Json
+
+    let pickler = FsPickler.CreateJsonSerializer()
     
     let start token port (agent: IAgent) = 
-        let app = warbler (fun _ -> agent |> Agent.saveJpegToBuffer |> ok) >>= Writers.setMimeType "image/jpeg"
+        let imageProvider = warbler (fun _ -> agent |> Agent.saveJpegToBuffer |> ok) >>= Writers.setMimeType "image/jpeg"
+        let jsonProvider = warbler (fun _ -> agent.Best |> pickler.Pickle |> ok) >>= Writers.setMimeType "text/json"
+        let app = choose [ path "/image" >>= imageProvider; path "/json" >>= jsonProvider ]
         let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
         Async.startThread token loop () |> ignore
         printfn "Suave listening at %d..." port
