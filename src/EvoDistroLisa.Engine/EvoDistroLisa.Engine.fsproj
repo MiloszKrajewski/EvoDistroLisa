@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Agent.fs" />
     <Content Include="app.config" />
+    <Compile Include="Mutate.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

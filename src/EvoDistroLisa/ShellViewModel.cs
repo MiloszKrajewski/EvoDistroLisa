@@ -1,5 +1,10 @@
+using Caliburn.Micro;
+using EvoDistroLisa.Domain;
+using EvoDistroLisa.Engine;
+using GenArt.Core.AST;
+using GenArt.Core.AST.Mutation;
+using Microsoft.FSharp.Core;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -8,13 +13,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Caliburn.Micro;
-using EvoDistroLisa.Domain;
-using EvoDistroLisa.Engine;
-using EvoDistroLisa.Engine.ZMQ;
-using GenArt.Core.AST;
-using GenArt.Core.AST.Mutation;
-using Microsoft.FSharp.Core;
 using Brush = EvoDistroLisa.Domain.Brush;
 using Point = EvoDistroLisa.Domain.Point;
 
@@ -65,14 +63,14 @@ namespace EvoDistroLisa
 				polygon.Points.Select(ReconstructPoint).ToArray());
 		}
 
-		private Domain.Brush.Brush ReconstructBrush(DnaBrush brush)
+		private Brush.Brush ReconstructBrush(DnaBrush brush)
 		{
 			return new Brush.Brush(
 				brush.Alpha / 255.0, 
 				brush.Red / 255.0, brush.Green / 255.0, brush.Blue / 255.0);
 		}
 
-		private Domain.Point.Point ReconstructPoint(DnaPoint point)
+		private Point.Point ReconstructPoint(DnaPoint point)
 		{
 			return new Point.Point(point.X / 200.0, point.Y / 200.0);
 		}
@@ -106,8 +104,8 @@ namespace EvoDistroLisa
 
 			var agent0 = Agent.createAgent(
 				pixels,
-				// Agent.createMutator(),
-				FuncConvert.ToFSharpFunc<Scene.Scene, Scene.Scene>(Mutate),
+				Agent.createMutator(),
+				// FuncConvert.ToFSharpFunc<Scene.Scene, Scene.Scene>(Mutate),
 				// WpfFitness.createRendererFactory(),
 				Win32Fitness.createRendererFactory(true),
 				// WBxFitness.createRendererFactory(),
@@ -162,7 +160,7 @@ namespace EvoDistroLisa
 			//	.ObserveOn(DispatcherScheduler.Current)
 			//	.Subscribe(m => Speed = string.Format("{0}/{1}", m, agent0.Best.Scene.Polygons.Length));
 
-			RenderTargetBitmap target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+			var target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
 			agent0.Improved
 				//.Sample(TimeSpan.FromMilliseconds(200))
 				.ObserveOn(DispatcherScheduler.Current)

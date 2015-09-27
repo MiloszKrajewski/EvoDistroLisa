@@ -7,13 +7,25 @@ module Data =
     let inline mutate dirty rng rate func arg = 
         match allow rng rate with 
         | false -> arg
-        | _ -> dirty |> Flag.set; func arg 
+        | _ -> dirty |> Flag.set; func arg
+
+module Domain =
+    open FSharp.Fx
+
+    type Value = float
+    type Point = { X: Value; Y: Value }
+    type Brush = { A: Value; R: Value; G: Value; B: Value }
+    type Polygon = { Brush: Brush; Points: Point array }
+    type Pixels = { Width: int; Height: int; Pixels: uint32[] }
+    type Scene = 
+        { Polygons: Polygon array; Cargo: obj }
+        static member Zero = { Polygons = Array.empty; Cargo = null }
+
 
 module Brush =
     open FSharp.Fx
+    open Domain
     open Data
-
-    type Brush = { A: float; R: float; G: float; B: float }
 
     let alphaRate = Settings.brushAlphaRate
     let colorRate = Settings.brushColorRate
@@ -43,6 +55,7 @@ module Brush =
 module Point =
     open FSharp.Fx
     open Data
+    open Domain
 
     let maxRate = Settings.pointMoveMaxRate
     let midRate = Settings.pointMoveMidRate
@@ -50,8 +63,6 @@ module Point =
     let maxXYRange = Settings.pointXYRange
     let midMoveRange = Settings.pointMoveMidRange
     let minMoveRange = Settings.pointMoveMinRange
-
-    type Point = { X: float; Y: float }
 
     let inline createXY rng = rng () |> Random.toFloat maxXYRange
 
@@ -80,13 +91,12 @@ module Polygon =
     open Data
     open Point
     open Brush
+    open Domain
 
     let insertPointRate = Settings.polygonInsertPointRate
     let deletePointRate = Settings.polygonDeletePointRate
     let polygonSizeRange = Settings.polygonSizeRange
     let minimumPolygonSize, maximumPolygonSize = polygonSizeRange
-
-    type Polygon = { Brush: Brush; Points: Point array }
 
     let createPoints rng =
         let count = rng () |> Random.toInt32 polygonSizeRange
@@ -147,6 +157,7 @@ module Scene =
     open Data
     open Point
     open Polygon
+    open Domain
 
     let insertPolygonRate = Settings.sceneInsertPolygonRate
     let deletePolygonRate = Settings.sceneDeletePolygonRate
@@ -154,11 +165,6 @@ module Scene =
 
     let sceneSizeRange = Settings.sceneSizeRange
     let minimumSceneSize, maximumSceneSize = sceneSizeRange
-
-    type Pixels = { Width: int; Height: int; Pixels: uint32[] }
-    type Scene = 
-        { Polygons: Polygon array; Cargo: obj }
-        static member Zero = { Polygons = Array.empty; Cargo = null }
 
     let insertPolygon dirty rng scene =
         let length = Array.length scene.Polygons
@@ -177,6 +183,19 @@ module Scene =
             { scene with Polygons = scene.Polygons |> Array.remove index }
         else
             scene
+
+//    let movePolygon dirty rng scene =
+//        let length = Array.length scene.Polygons
+//        if length > 1 && allow rng movePolygonRate then
+//            dirty |> Flag.set
+//            let source = rng () |> Random.toInt32 (0, length - 1)
+//            let polygon = scene.Polygons.[source]
+//            let target = rng () |> Random.toInt32 (0, length - 2)
+//            let removed = scene.Polygons |> Array.remove source
+//            let inserted = removed |> Array.insert target polygon
+//            { scene with Polygons = inserted }
+//        else
+//            scene
 
     let movePolygon dirty rng scene =
         let length = Array.length scene.Polygons

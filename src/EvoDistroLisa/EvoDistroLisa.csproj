@@ -261,7 +261,7 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETCore' And $(TargetFrameworkVersion) == 'v4.5'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETCore'">
       <ItemGroup>
         <Reference Include="Callisto">
           <HintPath>..\packages\Callisto\lib\winrt45\Callisto.dll</HintPath>
@@ -591,7 +591,7 @@
     </When>
   </Choose>
   <Choose>
-    <When Condition="$(TargetFrameworkIdentifier) == '.NETCore' And $(TargetFrameworkVersion) == 'v4.5'">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETCore'">
       <ItemGroup>
         <Reference Include="Windows.UI.Interactivity">
           <HintPath>..\packages\Windows.UI.Interactivity\lib\win8\Windows.UI.Interactivity.dll</HintPath>
