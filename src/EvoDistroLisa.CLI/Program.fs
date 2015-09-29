@@ -6,15 +6,15 @@ open System.Threading
 open System.Drawing
 
 module Agent = 
-    open EvoDistroLisa.UI
-    open EvoDistroLisa.Domain
-    open EvoDistroLisa.Engine
-    open FSharp.Control.Reactive
     open System
     open System.Reactive.Concurrency
     open System.Windows.Media.Imaging
     open System.Windows.Media
-    open EvoDistroLisa.Domain.Scene
+    open FSharp.Control.Reactive
+    open EvoDistroLisa
+    open EvoDistroLisa.UI
+    open EvoDistroLisa.Domain
+    open EvoDistroLisa.Engine
 
     let attachAgents token agents (master: IAgent) = 
         let pixels = master.Pixels
@@ -79,8 +79,8 @@ module Web =
     open Suave.Http.Successful
     open Suave.Http.Applicatives
     open FSharp.Fx
-    open EvoDistroLisa.Domain
     open Nessos.FsPickler.Json
+    open EvoDistroLisa
 
     let pickler = FsPickler.CreateJsonSerializer()
     
@@ -97,7 +97,6 @@ module Server =
     open EvoDistroLisa.Engine
     open EvoDistroLisa.Engine.ZMQ
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
 
     type Arguments = 
         | Listen of port: int
@@ -159,7 +158,6 @@ module Server =
 
 module Client = 
     open EvoDistroLisa.Engine.ZMQ
-    open EvoDistroLisa.Domain.Scene
 
     type Arguments = 
         | Connect of host: string * port: int

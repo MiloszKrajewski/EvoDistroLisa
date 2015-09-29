@@ -121,7 +121,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <PropertyGroup>
-    <PreBuildEvent>call $(ProjectDir)\..\resources\pull.cmd $(PlatformName) libzmq.dll</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -543,4 +544,7 @@
       </ItemGroup>
     </When>
   </Choose>
+  <PropertyGroup>
+    <PostBuildEvent>call $(ProjectDir)..\resources\pull.cmd $(PlatformName) libzmq.dll</PostBuildEvent>
+  </PropertyGroup>
 </Project>

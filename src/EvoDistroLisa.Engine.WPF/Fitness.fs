@@ -7,7 +7,6 @@ module WpfFitness =
     open System.Windows.Media.Imaging
     open FSharp.Fx
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
     open EvoDistroLisa.Engine.Unsafe
 
     let private format = PixelFormats.Pbgra32

@@ -1,5 +1,4 @@
 using Caliburn.Micro;
-using EvoDistroLisa.Domain;
 using EvoDistroLisa.Engine;
 using GenArt.Core.AST;
 using GenArt.Core.AST.Mutation;
@@ -13,8 +12,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Brush = EvoDistroLisa.Domain.Brush;
-using Point = EvoDistroLisa.Domain.Point;
 
 namespace EvoDistroLisa
 {
@@ -43,7 +40,7 @@ namespace EvoDistroLisa
 			}
 		}
 
-		public Scene.Scene Mutate(Scene.Scene scene)
+		public Domain.Scene Mutate(Domain.Scene scene)
 		{
 			var drawing = scene.Cargo as DnaDrawing;
 			drawing = drawing == null ? new DnaDrawing(200, 200) : drawing.Clone();
@@ -51,28 +48,28 @@ namespace EvoDistroLisa
 			return ReconstructScene(drawing);
 		}
 
-		private Scene.Scene ReconstructScene(DnaDrawing drawing)
+		private Domain.Scene ReconstructScene(DnaDrawing drawing)
 		{
-			return new Scene.Scene(drawing.Polygons.Select(ReconstructPoly).ToArray(), drawing);
+			return new Domain.Scene(drawing.Polygons.Select(ReconstructPoly).ToArray(), drawing);
 		}
 
-		private Polygon.Polygon ReconstructPoly(DnaPolygon polygon)
+		private Domain.Polygon ReconstructPoly(DnaPolygon polygon)
 		{
-			return new Polygon.Polygon(
+			return new Domain.Polygon(
 				ReconstructBrush(polygon.Brush), 
 				polygon.Points.Select(ReconstructPoint).ToArray());
 		}
 
-		private Brush.Brush ReconstructBrush(DnaBrush brush)
+		private Domain.Brush ReconstructBrush(DnaBrush brush)
 		{
-			return new Brush.Brush(
+			return new Domain.Brush(
 				brush.Alpha / 255.0, 
 				brush.Red / 255.0, brush.Green / 255.0, brush.Blue / 255.0);
 		}
 
-		private Point.Point ReconstructPoint(DnaPoint point)
+		private Domain.Point ReconstructPoint(DnaPoint point)
 		{
-			return new Point.Point(point.X / 200.0, point.Y / 200.0);
+			return new Domain.Point(point.X / 200.0, point.Y / 200.0);
 		}
 
 		public ShellViewModel()
@@ -82,12 +79,12 @@ namespace EvoDistroLisa
 			var imgPath = Path.Combine(Environment.CurrentDirectory, "monalisa.png");
 			var evoPath = imgPath + ".evoboot";
 
-			Scene.Pixels pixels;
-			RenderedScene scene0;
+			Domain.Pixels pixels;
+			Domain.RenderedScene scene0;
 
 			if (File.Exists(evoPath))
 			{
-				var message = Pickler.load<BootstrapScene>(
+				var message = Pickler.load<Domain.BootstrapScene>(
 					File.ReadAllBytes(evoPath));
 				pixels = message.Pixels;
 				scene0 = message.Scene;
@@ -96,7 +93,7 @@ namespace EvoDistroLisa
 			{
 				using (var bitmap = new Bitmap(imgPath))
 					pixels = Win32Fitness.createPixels(bitmap);
-				scene0 = RenderedScene.Zero;
+				scene0 = Domain.RenderedScene.Zero;
 			}
 
 			var width = pixels.Width;

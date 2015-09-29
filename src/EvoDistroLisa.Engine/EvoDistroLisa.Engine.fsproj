@@ -50,9 +50,9 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Compile Include="Mutate.fs" />
     <Compile Include="Agent.fs" />
     <Content Include="app.config" />
-    <Compile Include="Mutate.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

@@ -58,7 +58,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>call $(ProjectDir)\..\resources\pull.cmd $(PlatformName) libzmq.dll</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ZmqLoopTests.fs" />
@@ -206,4 +207,7 @@
   </Choose>
   <Import Project="..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props" Condition="Exists('..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_props).props')" Label="Paket" />
   <Import Project="..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_targets).targets" Condition="Exists('..\packages\xunit.runner.visualstudio\build\$(__paket__xunit_runner_visualstudio_targets).targets')" Label="Paket" />
+  <PropertyGroup>
+    <PostBuildEvent>call $(ProjectDir)..\resources\pull.cmd $(PlatformName) libzmq.dll</PostBuildEvent>
+  </PropertyGroup>
 </Project>
