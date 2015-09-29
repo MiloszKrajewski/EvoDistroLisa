@@ -5,20 +5,14 @@ module Mutate =
     open EvoDistroLisa
     open EvoDistroLisa.Domain
 
-    let alphaRate = Settings.brushAlphaRate
-    let colorRate = Settings.brushColorRate
-
-    let alphaRange = Settings.brushAlphaRange
-    let colorRange = Settings.brushColorRange
-
     let inline allow rng rate = (rng () |> Random.toFloat (0.0, float rate)) <= 1.0
     let inline mutate dirty rng rate func arg = 
         match allow rng rate with 
         | false -> arg
         | _ -> dirty |> Flag.set; func arg
 
-    let inline createAlpha rng = rng () |> Random.toFloat alphaRange
-    let inline createColor rng = rng () |> Random.toFloat colorRange
+    let inline createAlpha rng = rng () |> Random.toFloat Settings.brushAlphaRange
+    let inline createColor rng = rng () |> Random.toFloat Settings.brushColorRange
 
     let createBrush rng =
         { A = createAlpha rng; R = createColor rng; G = createColor rng; B = createColor rng }
@@ -31,47 +25,36 @@ module Mutate =
         let mutate = mutate dirty rng
 
         brush 
-        |> mutate alphaRate mutateAlpha 
-        |> mutate colorRate mutateRed
-        |> mutate colorRate mutateGreen
-        |> mutate colorRate mutateBlue
+        |> mutate Settings.brushAlphaRate mutateAlpha 
+        |> mutate Settings.brushColorRate mutateRed
+        |> mutate Settings.brushColorRate mutateGreen
+        |> mutate Settings.brushColorRate mutateBlue
 
-    let maxRate = Settings.pointMoveMaxRate
-    let midRate = Settings.pointMoveMidRate
-    let minRate = Settings.pointMoveMinRate
-    let maxXYRange = Settings.pointXYRange
-    let midMoveRange = Settings.pointMoveMidRange
-    let minMoveRange = Settings.pointMoveMinRange
-
-    let inline createXY rng = rng () |> Random.toFloat maxXYRange
+    let inline createXY rng = rng () |> Random.toFloat Settings.pointXYRange
 
     let createPoint rng =
         { X = createXY rng; Y = createXY rng }
 
     let movePoint rng range point =
-        let inline move v = (rng () |> Random.toFloat range) + v |> cap maxXYRange
+        let inline move v = (rng () |> Random.toFloat range) + v |> cap Settings.pointXYRange
         { point with X = move point.X; Y = move point.Y }
 
-    let fiddlePoint rng point =
-        movePoint rng minMoveRange point
+    let inline fiddlePoint rng point = 
+        movePoint rng Settings.pointMoveMinRange point
 
     let mutatePoint dirty rng point =
         let inline mutateMax _ = createPoint rng
-        let inline mutateMid point = movePoint rng midMoveRange point
-        let inline mutateMin point = movePoint rng minMoveRange point
+        let inline mutateMid point = movePoint rng Settings.pointMoveMidRange point
+        let inline mutateMin point = movePoint rng Settings.pointMoveMinRange point
+        let mutate = mutate dirty rng
 
         point
-        |> mutate dirty rng maxRate mutateMax
-        |> mutate dirty rng midRate mutateMid
-        |> mutate dirty rng minRate mutateMin
-
-    let insertPointRate = Settings.polygonInsertPointRate
-    let deletePointRate = Settings.polygonDeletePointRate
-    let polygonSizeRange = Settings.polygonSizeRange
-    let minimumPolygonSize, maximumPolygonSize = polygonSizeRange
+        |> mutate Settings.pointMoveMaxRate mutateMax
+        |> mutate Settings.pointMoveMidRate mutateMid
+        |> mutate Settings.pointMoveMinRate mutateMin
 
     let createPoints rng =
-        let count = rng () |> Random.toInt32 polygonSizeRange
+        let count = rng () |> Random.toInt32 Settings.polygonSizeRange
         Array.init count (fun _ -> createPoint rng)
 
     let createLargePolygon rng =
@@ -84,6 +67,7 @@ module Mutate =
 
     let insertPoint dirty rng rate points =
         let length = Array.length points
+        let _, maximumPolygonSize = Settings.polygonSizeRange
         if length < maximumPolygonSize && allow rng rate then
             dirty |> Flag.set
             let index0 = rng () |> Random.toInt32 (0, length - 1)
@@ -99,6 +83,7 @@ module Mutate =
 
     let deletePoint dirty rng rate points =
         let length = Array.length points
+        let minimumPolygonSize, _ = Settings.polygonSizeRange
         if length > minimumPolygonSize && allow rng rate then
             dirty |> Flag.set
             let index = rng () |> Random.toInt32 (0, length - 1)
@@ -113,10 +98,14 @@ module Mutate =
         { polygon with Points = polygon.Points |> Array.copy }
 
     let mutatePolygon dirty rng polygon =
-        let inline mutateBrush polygon = { polygon with Brush = mutateBrush dirty rng polygon.Brush }
-        let inline insertPoint polygon = { polygon with Points = insertPoint dirty rng insertPointRate polygon.Points }
-        let inline deletePoint polygon = { polygon with Points = deletePoint dirty rng deletePointRate polygon.Points }
-        let inline mutatePoints polygon = { polygon with Points = mutatePoints dirty rng polygon.Points }
+        let inline mutateBrush polygon = 
+            { polygon with Brush = polygon.Brush |> mutateBrush dirty rng }
+        let inline insertPoint polygon = 
+            { polygon with Points = polygon.Points |> insertPoint dirty rng Settings.polygonInsertPointRate }
+        let inline deletePoint polygon = 
+            { polygon with Points = polygon.Points |> deletePoint dirty rng Settings.polygonDeletePointRate }
+        let inline mutatePoints polygon = 
+            { polygon with Points = polygon.Points |> mutatePoints dirty rng }
     
         polygon 
         |> mutateBrush 
@@ -124,16 +113,10 @@ module Mutate =
         |> deletePoint 
         |> mutatePoints
 
-    let insertPolygonRate = Settings.sceneInsertPolygonRate
-    let deletePolygonRate = Settings.sceneDeletePolygonRate
-    let movePolygonRate = Settings.sceneMovePolygonRate
-
-    let sceneSizeRange = Settings.sceneSizeRange
-    let minimumSceneSize, maximumSceneSize = sceneSizeRange
-
     let insertPolygon dirty rng scene =
         let length = Array.length scene.Polygons
-        if length < maximumSceneSize && allow rng insertPolygonRate then
+        let _, maximumSceneSize = Settings.sceneSizeRange
+        if length < maximumSceneSize && allow rng Settings.sceneInsertPolygonRate then
             dirty |> Flag.set
             let index = rng () |> Random.toInt32 (0, length)
             { scene with Polygons = scene.Polygons |> Array.insert index (createSmallPolygon rng) }
@@ -142,32 +125,20 @@ module Mutate =
 
     let deletePolygon dirty rng scene =
         let length = Array.length scene.Polygons
-        if length > minimumSceneSize && allow rng deletePolygonRate then
+        let minimumSceneSize, _ = Settings.sceneSizeRange
+        if length > minimumSceneSize && allow rng Settings.sceneDeletePolygonRate then
             dirty |> Flag.set
             let index = rng () |> Random.toInt32 (0, length - 1)
             { scene with Polygons = scene.Polygons |> Array.remove index }
         else
             scene
 
-    //    let movePolygon dirty rng scene =
-    //        let length = Array.length scene.Polygons
-    //        if length > 1 && allow rng movePolygonRate then
-    //            dirty |> Flag.set
-    //            let source = rng () |> Random.toInt32 (0, length - 1)
-    //            let polygon = scene.Polygons.[source]
-    //            let target = rng () |> Random.toInt32 (0, length - 2)
-    //            let removed = scene.Polygons |> Array.remove source
-    //            let inserted = removed |> Array.insert target polygon
-    //            { scene with Polygons = inserted }
-    //        else
-    //            scene
-
     let movePolygon dirty rng scene =
         let length = Array.length scene.Polygons
-        if length > 1 && allow rng movePolygonRate then
+        if length > 1 && allow rng Settings.sceneMovePolygonRate then
             let source = rng () |> Random.toInt32 (0, length - 1)
             let target = rng () |> Random.toInt32 (0, length - 1)
-            if source <> target then
+            if source <> target && source <> target + 1 then
                 dirty |> Flag.set
                 { scene with Polygons = scene.Polygons |> Array.move source target }
             else
