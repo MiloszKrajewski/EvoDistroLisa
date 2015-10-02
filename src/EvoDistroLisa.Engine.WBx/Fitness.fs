@@ -9,7 +9,6 @@ module WBxFitness =
     open System.Windows.Media.Imaging
     open FSharp.Fx
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
     open EvoDistroLisa.Engine.Unsafe
     open Microsoft.FSharp.NativeInterop
 
@@ -51,7 +50,6 @@ module WBxFitness =
 
     let createRenderer (original: Pixels) =
         let { Width = width; Height = height; Pixels = sourcePixels } = original
-        let targetPixels = Array.zeroCreate<uint32> (height * width)
         let bitmapFactory = threadref (fun () -> BitmapFactory.New(width, height))
         let fitness (scene: Scene) =
             let targetBitmap = bitmapFactory ()

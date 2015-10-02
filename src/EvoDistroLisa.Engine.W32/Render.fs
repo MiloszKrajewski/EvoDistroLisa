@@ -2,9 +2,7 @@
 
 module Win32Renderer =
     open System.Drawing
-    open EvoDistroLisa.Domain.Point
-    open EvoDistroLisa.Domain.Polygon
-    open EvoDistroLisa.Domain.Scene
+    open EvoDistroLisa.Domain
 
     let inline private toByte v = (float v |> max 0.0 |> min 1.0) * 255.0 |> round |> int
 

@@ -6,15 +6,15 @@ open System.Threading
 open System.Drawing
 
 module Agent = 
-    open EvoDistroLisa.UI
-    open EvoDistroLisa.Domain
-    open EvoDistroLisa.Engine
-    open FSharp.Control.Reactive
     open System
     open System.Reactive.Concurrency
     open System.Windows.Media.Imaging
     open System.Windows.Media
-    open EvoDistroLisa.Domain.Scene
+    open FSharp.Control.Reactive
+    open EvoDistroLisa
+    open EvoDistroLisa.UI
+    open EvoDistroLisa.Domain
+    open EvoDistroLisa.Engine
 
     let attachAgents token agents (master: IAgent) = 
         let pixels = master.Pixels
@@ -79,8 +79,8 @@ module Web =
     open Suave.Http.Successful
     open Suave.Http.Applicatives
     open FSharp.Fx
-    open EvoDistroLisa.Domain
     open Nessos.FsPickler.Json
+    open EvoDistroLisa
 
     let pickler = FsPickler.CreateJsonSerializer()
     
@@ -93,6 +93,51 @@ module Web =
         printfn "Suave listening at %d..." port
 
 module Server = 
+    open EvoDistroLisa
+    open EvoDistroLisa.Engine
+    open EvoDistroLisa.Engine.ZMQ
+    open EvoDistroLisa.Domain
+    open EvoDistroLisa.Domain.Scene
+
+    type Arguments = 
+        | Listen of port: int
+        | Suave of port: int
+        | Restart of string
+        | Resume of string
+        | Agents of int
+        | Gui
+        interface IArgParserTemplate with
+            member x.Usage = 
+                match x with
+                | Listen _ -> "the port to listen (as server)"
+                | Suave _ -> "the port to listen for HTTP requests"
+                | Agents _ -> "number of agents"
+                | Restart _ -> "restart processing (requires image file)"
+                | Resume _ -> "resume processing (requires bootstrap file)"
+                | Gui -> "open GUI window"
+
+    open EvoDistroLisa
+    open EvoDistroLisa.Engine
+    open EvoDistroLisa.Engine.ZMQ
+    open EvoDistroLisa.Domain
+
+    type Arguments = 
+        | Listen of port: int
+        | Suave of port: int
+        | Restart of string
+        | Resume of string
+        | Agents of int
+        | Gui
+        interface IArgParserTemplate with
+            member x.Usage = 
+                match x with
+                | Listen _ -> "the port to listen (as server)"
+                | Suave _ -> "the port to listen for HTTP requests"
+                | Agents _ -> "number of agents"
+                | Restart _ -> "restart processing (requires image file)"
+                | Resume _ -> "resume processing (requires bootstrap file)"
+                | Gui -> "open GUI window"
+
     let start argv =
         let parser = ArgumentParser.Create<Arguments>()
         let arguments = parser.Parse(argv |> Array.ofSeq)
@@ -129,7 +174,6 @@ module Server =
 
 module Client = 
     open EvoDistroLisa.Engine.ZMQ
-    open EvoDistroLisa.Domain.Scene
 
     type Arguments = 
         | Connect of host: string * port: int

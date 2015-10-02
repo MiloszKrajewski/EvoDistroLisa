@@ -6,7 +6,6 @@ module Win32Fitness =
     open FSharp.Fx
     open EvoDistroLisa.Engine.Unsafe
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
     open FSharp.Collections.ParallelSeq
 
     let private format = PixelFormat.Format32bppPArgb

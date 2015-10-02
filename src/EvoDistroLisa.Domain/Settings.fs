@@ -1,4 +1,4 @@
-﻿namespace EvoDistroLisa.Domain
+﻿namespace EvoDistroLisa
 
 module Settings =
     let brushAlphaRate = 1500.0

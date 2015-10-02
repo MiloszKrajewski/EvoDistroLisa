@@ -5,7 +5,6 @@ module ZmqClient =
     open fszmq
     open FSharp.Fx
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
     open EvoDistroLisa.Engine
     open EvoDistroLisa.Engine.ZMQ.Message
 

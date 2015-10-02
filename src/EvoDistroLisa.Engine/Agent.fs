@@ -4,10 +4,11 @@ module Agent =
     open System
     open System.Threading
     open FSharp.Fx
+    open EvoDistroLisa
     open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
+    open EvoDistroLisa.Mutate
 
-    type private Agent<'a> = MailboxProcessor<'a>
+    // type private Agent<'a> = MailboxProcessor<'a>
 
     type private BestScene = 
         | Champion of RenderedScene
@@ -65,15 +66,14 @@ module Agent =
             let agent, _ = Async.startAgent token loop
             fun count -> count |> Agent.send agent
 
-        { 
-            new IAgent with
-                member x.Push(count: int64) = count |> collect
-                member x.Push(scene: RenderedScene) = scene |> grind
-                member x.Mutated = mutatedEvent.Publish :> IObservable<_>
-                member x.Improved = improvedEvent.Publish :> IObservable<_>
-                member x.Pixels = pixels
-                member x.Best = Interlocked.getRef bestScene
-                member x.Mutations = Interlocked.getLong mutationCount
+        { new IAgent with
+            member x.Push(count: int64) = count |> collect
+            member x.Push(scene: RenderedScene) = scene |> grind
+            member x.Mutated = mutatedEvent.Publish :> IObservable<_>
+            member x.Improved = improvedEvent.Publish :> IObservable<_>
+            member x.Pixels = pixels
+            member x.Best = Interlocked.getRef bestScene
+            member x.Mutations = Interlocked.getLong mutationCount
         }
 
     let createAgent
@@ -128,15 +128,14 @@ module Agent =
             let agent, _ = Async.startAgent token (loop 0L best)
             fun scene -> scene |> Agent.send agent
 
-        { 
-            new IAgent with
-                member x.Push(count: int64) = count |> collect
-                member x.Push(scene: RenderedScene) = scene |> grind
-                member x.Mutated = mutatedEvent.Publish :> IObservable<_>
-                member x.Improved = improvedEvent.Publish :> IObservable<_>
-                member x.Pixels = pixels
-                member x.Best = Interlocked.getRef bestScene
-                member x.Mutations = Interlocked.getLong mutationCount
+        { new IAgent with
+            member x.Push(count: int64) = count |> collect
+            member x.Push(scene: RenderedScene) = scene |> grind
+            member x.Mutated = mutatedEvent.Publish :> IObservable<_>
+            member x.Improved = improvedEvent.Publish :> IObservable<_>
+            member x.Pixels = pixels
+            member x.Best = Interlocked.getRef bestScene
+            member x.Mutations = Interlocked.getLong mutationCount
         }
 
     let attachAgent (slave: IAgent) (master: IAgent) =

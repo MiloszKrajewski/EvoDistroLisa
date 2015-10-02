@@ -4,9 +4,7 @@ module WBxRender =
     open System.Windows
     open System.Windows.Media
     open System.Windows.Media.Imaging
-    open EvoDistroLisa.Domain.Point
-    open EvoDistroLisa.Domain.Polygon
-    open EvoDistroLisa.Domain.Scene
+    open EvoDistroLisa.Domain
 
     let inline private toByte v = (float v |> max 0.0 |> min 1.0) * 255.0 |> round |> byte
     let inline private createColor (a, r, g, b) = Color.FromArgb(toByte a, toByte r, toByte g, toByte b)
