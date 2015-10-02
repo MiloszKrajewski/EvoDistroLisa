@@ -93,40 +93,10 @@ module Web =
         printfn "Suave listening at %d..." port
 
 module Server = 
-    open EvoDistroLisa
-    open EvoDistroLisa.Engine
-    open EvoDistroLisa.Engine.ZMQ
-    open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
-
-    type Arguments = 
-        | Listen of port: int
-        | Suave of port: int
-        | Restart of string
-        | Resume of string
-        | Agents of int
-        | Gui
-        interface IArgParserTemplate with
-            member x.Usage = 
-                match x with
-                | Listen _ -> "the port to listen (as server)"
-                | Suave _ -> "the port to listen for HTTP requests"
-                | Agents _ -> "number of agents"
-                | Restart _ -> "restart processing (requires image file)"
-                | Resume _ -> "resume processing (requires bootstrap file)"
-                | Gui -> "open GUI window"
-
     let start argv =
         let parser = ArgumentParser.Create<Arguments>()
         let arguments = parser.Parse(argv |> Array.ofSeq)
-        let port = arguments.GetResult(<@ Listen @>, 5801)
         
-        let mode = 
-            match arguments.Contains(<@ Restart @>), arguments.Contains(<@ Resume @>) with
-            | true, false -> arguments.GetResult(<@ Restart @>) |> Restart
-            | false, true -> arguments.GetResult(<@ Resume @>) |> Resume
-            | _ -> failwith "Server requires either --restart or --resume specified, but not both"
-
         let { Pixels = pixels; Scene = best } = 
             match mode with
             | Restart fn -> { Pixels = Image.FromFile(fn) |> Win32Fitness.createPixels; Scene = RenderedScene.Zero }
@@ -163,27 +133,46 @@ module Client =
 
     type Arguments = 
         | Connect of host: string * port: int
+        | Restart of string
+        | Resume of string
         | Agents of int
         | Gui
+        | Listen of port: int
+        | Suave of port: int
         interface IArgParserTemplate with
             member x.Usage = 
                 match x with
                 | Connect _ -> "the host and port to connect to (as client)"
+                | Restart _ -> "restart processing (requires image file)"
+                | Resume _ -> "resume processing (requires bootstrap file)"
                 | Agents _ -> "number of agents"
                 | Gui -> "open GUI window"
+                | Listen _ -> "the port to listen (as server)"
+                | Suave _ -> "the port to listen for HTTP requests"
 
     let start argv =
         let parser = ArgumentParser.Create<Arguments>()
         let arguments = parser.Parse(argv |> Array.ofSeq)
-        let host, port = arguments.GetResult(<@ Connect @>, ("127.0.0.1", 5801))
+
+        let mode = 
+            let connect = arguments.TryGetResult(<@ Connect @>) |> Option.map Connect
+            let resume = arguments.TryGetResult(<@ Resume @>) |> Option.map Resume
+            let restart = arguments.TryGetResult(<@ Restart @>) |> Option.map Restart
+            match connect, resume, restart with
+            | None, None, Some c -> c
+            | None, Some r, None -> r
+            | Some r, None, None -> r
+            | _ -> failwith "One and only one of --restart, --resume or --connect is required"
+
+        let listen = arguments.TryGetResult(<@ Listen @>)
         let agents = arguments.GetResult(<@ Agents @>, 0)
         let gui = arguments.Contains(<@ Gui @>)
         let token = CancellationToken.None
 
-        let agent = ZmqClient.createClient host port token
+        let agent = ZmqClient.createClient connectHost connectPort token
         agent |> Agent.attachAgents token agents |> ignore
         if gui then agent |> Agent.attachGui token
-        printfn "Connected to %s:%d..." host port
+        printfn "Connected to %s:%d..." connectHost connectPort
 
         while true do 
             printf "."
