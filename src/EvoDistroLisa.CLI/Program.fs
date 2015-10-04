@@ -5,6 +5,30 @@ open System.IO
 open System.Threading
 open System.Drawing
 
+module Web = 
+    open Suave.Http
+    open Suave.Http.Successful
+    open Suave.Http.Applicatives
+    open FSharp.Fx
+    open Nessos.FsPickler.Json
+    open EvoDistroLisa
+    open EvoDistroLisa.Engine
+
+    let pickler = FsPickler.CreateJsonSerializer()
+
+    let saveJpeg (agent: IAgent) = 
+        let width, height = agent.Pixels.Width, agent.Pixels.Height
+        let scene = agent.Best.Scene
+        WpfRender.renderJpeg width height scene
+    
+    let start token port (agent: IAgent) = 
+        let imageProvider = warbler (fun _ -> agent |> saveJpeg |> ok) >>= Writers.setMimeType "image/jpeg"
+        let jsonProvider = warbler (fun _ -> agent.Best |> pickler.Pickle |> ok) >>= Writers.setMimeType "text/json"
+        let app = choose [ path "/image" >>= imageProvider; path "/json" >>= jsonProvider ]
+        let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
+        Async.startThread token loop () |> ignore
+        printfn "Suave listening at %d..." port
+
 module Agent = 
     open System
     open System.Reactive.Concurrency
@@ -15,6 +39,9 @@ module Agent =
     open EvoDistroLisa.UI
     open EvoDistroLisa.Domain
     open EvoDistroLisa.Engine
+    open EvoDistroLisa.Engine.ZMQ
+
+    let defaultPort = 5801
 
     let attachAgents token agents (master: IAgent) = 
         let pixels = master.Pixels
@@ -23,8 +50,8 @@ module Agent =
             let mutator = Agent.createMutator ()
             let renderer = 
                 match index with
-                // | 1 -> Win32Fitness.createRendererFactory (agents > 1)
-                | _ -> WpfFitness.createRendererFactory ()
+                | 1 -> Win32Fitness.createRendererFactory (agents > 1)
+                | _ -> WBxFitness.createRendererFactory ()
             let agent = Agent.createAgent pixels mutator renderer best token
             master |> Agent.attachAgent agent 
             agent.Push(best)
@@ -56,125 +83,6 @@ module Agent =
             |> ignore
         )
 
-        agent.Improved
-        |> Observable.sample (TimeSpan.FromSeconds(1.0))
-        |> Observable.subscribe (fun scene ->
-            let polygons = scene.Scene.Polygons.Length
-            let mutations = agent.Mutations
-            printfn "Polygons: %d; Mutations: %d" polygons mutations)
-        |> ignore
-
-    let saveJpegToBuffer (agent: IAgent) = 
-        let target = 
-            RenderTargetBitmap(agent.Pixels.Width, agent.Pixels.Height, 96.0, 96.0, PixelFormats.Pbgra32)
-        WpfRender.render target agent.Best.Scene |> ignore
-        let encoder = JpegBitmapEncoder()
-        use stream = new MemoryStream()
-        encoder.Frames.Add(BitmapFrame.Create(target))
-        encoder.Save(stream)
-        stream.ToArray()
-
-module Web = 
-    open Suave.Http
-    open Suave.Http.Successful
-    open Suave.Http.Applicatives
-    open FSharp.Fx
-    open Nessos.FsPickler.Json
-    open EvoDistroLisa
-
-    let pickler = FsPickler.CreateJsonSerializer()
-    
-    let start token port (agent: IAgent) = 
-        let imageProvider = warbler (fun _ -> agent |> Agent.saveJpegToBuffer |> ok) >>= Writers.setMimeType "image/jpeg"
-        let jsonProvider = warbler (fun _ -> agent.Best |> pickler.Pickle |> ok) >>= Writers.setMimeType "text/json"
-        let app = choose [ path "/image" >>= imageProvider; path "/json" >>= jsonProvider ]
-        let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
-        Async.startThread token loop () |> ignore
-        printfn "Suave listening at %d..." port
-
-module Server = 
-    open EvoDistroLisa
-    open EvoDistroLisa.Engine
-    open EvoDistroLisa.Engine.ZMQ
-    open EvoDistroLisa.Domain
-    open EvoDistroLisa.Domain.Scene
-
-    type Arguments = 
-        | Listen of port: int
-        | Suave of port: int
-        | Restart of string
-        | Resume of string
-        | Agents of int
-        | Gui
-        interface IArgParserTemplate with
-            member x.Usage = 
-                match x with
-                | Listen _ -> "the port to listen (as server)"
-                | Suave _ -> "the port to listen for HTTP requests"
-                | Agents _ -> "number of agents"
-                | Restart _ -> "restart processing (requires image file)"
-                | Resume _ -> "resume processing (requires bootstrap file)"
-                | Gui -> "open GUI window"
-
-    open EvoDistroLisa
-    open EvoDistroLisa.Engine
-    open EvoDistroLisa.Engine.ZMQ
-    open EvoDistroLisa.Domain
-
-    type Arguments = 
-        | Listen of port: int
-        | Suave of port: int
-        | Restart of string
-        | Resume of string
-        | Agents of int
-        | Gui
-        interface IArgParserTemplate with
-            member x.Usage = 
-                match x with
-                | Listen _ -> "the port to listen (as server)"
-                | Suave _ -> "the port to listen for HTTP requests"
-                | Agents _ -> "number of agents"
-                | Restart _ -> "restart processing (requires image file)"
-                | Resume _ -> "resume processing (requires bootstrap file)"
-                | Gui -> "open GUI window"
-
-    let start argv =
-        let parser = ArgumentParser.Create<Arguments>()
-        let arguments = parser.Parse(argv |> Array.ofSeq)
-        
-        let { Pixels = pixels; Scene = best } = 
-            match mode with
-            | Restart fn -> { Pixels = Image.FromFile(fn) |> Win32Fitness.createPixels; Scene = RenderedScene.Zero }
-            | Resume fn -> File.ReadAllBytes(fn) |> Pickler.load<BootstrapScene>
-            | _ -> mode |> sprintf "Unexpected mode: %A" |> failwith
-
-        let agents = arguments.GetResult(<@ Agents @>, 0)
-        let gui = arguments.Contains(<@ Gui @>)
-        let suave = 
-            match arguments.Contains(<@ Suave @>) with 
-            | true -> arguments.GetResult(<@ Suave @>) |> Some 
-            | _ -> None
-
-        let token = CancellationToken.None
-
-        let agent = ZmqServer.createServer port pixels best token
-        agent |> Agent.attachAgents token agents |> ignore
-
-        printfn "Agent listening at %d..." port
-
-        if gui then 
-            agent |> Agent.attachGui token
-
-        if suave.IsSome then
-            agent |> Web.start token suave.Value
-
-        while true do 
-            printf "."
-            Thread.Sleep(10000)
-
-module Client = 
-    open EvoDistroLisa.Engine.ZMQ
-
     type Arguments = 
         | Connect of host: string * port: int
         | Restart of string
@@ -200,23 +108,67 @@ module Client =
 
         let mode = 
             let connect = arguments.TryGetResult(<@ Connect @>) |> Option.map Connect
-            let resume = arguments.TryGetResult(<@ Resume @>) |> Option.map Resume
             let restart = arguments.TryGetResult(<@ Restart @>) |> Option.map Restart
+            let resume = arguments.TryGetResult(<@ Resume @>) |> Option.map Resume
             match connect, resume, restart with
             | None, None, Some c -> c
             | None, Some r, None -> r
             | Some r, None, None -> r
             | _ -> failwith "One and only one of --restart, --resume or --connect is required"
 
-        let listen = arguments.TryGetResult(<@ Listen @>)
-        let agents = arguments.GetResult(<@ Agents @>, 0)
+        let agents = arguments.GetResult(<@ Agents @>, 1) |> max 0
         let gui = arguments.Contains(<@ Gui @>)
+        let listen = arguments.TryGetResult(<@ Listen @>)
+        let suave = arguments.TryGetResult(<@ Suave @>)
         let token = CancellationToken.None
 
-        let agent = ZmqClient.createClient connectHost connectPort token
-        agent |> Agent.attachAgents token agents |> ignore
-        if gui then agent |> Agent.attachGui token
-        printfn "Connected to %s:%d..." connectHost connectPort
+        let clientAgent = 
+            match mode with
+            | Connect (h, p) -> 
+                printfn "Connecting to %s:%d..." h p
+                ZmqClient.createClient h p token |> Some
+            | _ -> None
+
+        let { Pixels = pixels; Scene = best } = 
+            match mode, clientAgent with
+            | Restart fn, _ -> { Pixels = Image.FromFile(fn) |> Win32Fitness.createPixels; Scene = RenderedScene.Zero }
+            | Resume fn, _ -> File.ReadAllBytes(fn) |> Pickler.load<BootstrapScene>
+            | Connect _, Some agent -> { Pixels = agent.Pixels; Scene = agent.Best }
+            | Connect _, None -> failwith "Failed to create clientAgent"
+            | _ -> failwithf "Unhandled mode: %A" mode
+
+        let serverAgent =
+            match listen with
+            | Some p -> 
+                printfn "Listening at %d..." p
+                ZmqServer.createServer p pixels best token |> Some
+            | _ -> None
+
+        let agent =
+            match clientAgent, serverAgent with
+            | Some a, _ -> a
+            | _, Some a -> a
+            | _ -> Agent.createPassiveAgent pixels best token
+
+        let speed = 
+            agent.Improved
+            |> Observable.map (fun _ -> agent.Mutations)
+            |> Observable.slidingWindow (TimeSpan.FromSeconds(5.0)) 
+            |> Observable.choose (fun tsm ->
+                let length = tsm.Length
+                if length <= 1 then None
+                else
+                    let first, last = tsm.[0], tsm.[length - 1]
+                    let time = last.Timestamp.Subtract(first.Timestamp)
+                    let diff = last.Value - first.Value
+                    (float diff / time.TotalSeconds) |> int |> Some)
+
+        // !!!
+
+        agent |> attachAgents token agents |> ignore
+
+        match gui with | true -> agent |> attachGui token | _ -> ()
+        match suave with | Some p -> agent |> Web.start token p | _ -> ()
 
         while true do 
             printf "."
@@ -227,23 +179,19 @@ module Program =
     open System.Reflection
     open System.IO
 
-    let startHelp argv =
+    let startHelp () =
         let exeName = Path.GetFileName(Assembly.GetExecutingAssembly().CodeBase)
-        printfn "Syntax: %s <command> [options...]" exeName
-        printfn "Commands:"
-        printfn "  server: create server"
-        printfn "  client: create client"
-        printfn "See: '%s <command> --help' for details" exeName
+        printfn "Syntax: %s [options...]" exeName
+        printfn "See: '%s --help' for details" exeName
 
     [<EntryPoint>]
     let main (argv: string[]) = 
         try
             UI.startup ()
             try
-                match argv |> List.ofSeq with
-                | "server" :: t -> Server.start t
-                | "client" :: t -> Client.start t
-                | l -> startHelp l
+                match argv |> List.ofArray with
+                | [] -> startHelp ()
+                | args -> Agent.start args
                 0
             finally
                 UI.shutdown ()

@@ -5,6 +5,7 @@ module WpfRender =
     open System.Windows.Media
     open System.Windows.Media.Imaging
     open EvoDistroLisa.Domain
+    open System.IO
 
     let inline private toByte v = (float v |> max 0.0 |> min 1.0) * 255.0 |> round |> byte
 
@@ -46,3 +47,13 @@ module WpfRender =
             scene |> renderScene extent ctx)
         bitmap.Render(vis)
         bitmap
+
+    let renderJpeg width height scene = 
+        let target = 
+            RenderTargetBitmap(width, height, 96.0, 96.0, PixelFormats.Pbgra32)
+        render target scene |> ignore
+        let encoder = JpegBitmapEncoder()
+        use stream = new MemoryStream()
+        encoder.Frames.Add(BitmapFrame.Create(target))
+        encoder.Save(stream)
+        stream.ToArray()

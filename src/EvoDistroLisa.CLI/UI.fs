@@ -1,8 +1,13 @@
 ﻿namespace EvoDistroLisa.CLI
 
 module UI = 
+    open System.IO
     open System.Windows
     open System.Threading
+    open System.Windows.Media
+    open System.Windows.Media.Imaging
+    open EvoDistroLisa
+    open EvoDistroLisa.Engine
 
     let applicationRef: Application ref = ref null
 

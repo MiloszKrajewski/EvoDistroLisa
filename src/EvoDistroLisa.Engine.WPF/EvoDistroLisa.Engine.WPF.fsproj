@@ -62,6 +62,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
     <ProjectReference Include="..\EvoDistroLisa.Domain\EvoDistroLisa.Domain.fsproj">
       <Name>EvoDistroLisa.Domain</Name>
