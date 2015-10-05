@@ -151,7 +151,7 @@ module Agent =
             | _ -> Agent.createPassiveAgent pixels best token
 
         let speed = 
-            agent.Improved
+            Observable.interval (TimeSpan.FromSeconds(1.0))
             |> Observable.map (fun _ -> agent.Mutations)
             |> Observable.slidingWindow (TimeSpan.FromSeconds(5.0)) 
             |> Observable.choose (fun tsm ->
@@ -161,7 +161,9 @@ module Agent =
                     let first, last = tsm.[0], tsm.[length - 1]
                     let time = last.Timestamp.Subtract(first.Timestamp)
                     let diff = last.Value - first.Value
-                    (float diff / time.TotalSeconds) |> int |> Some)
+                    (float diff / time.TotalSeconds) |> Some)
+            |> Observable.subscribe (fun s ->
+                printfn "speed: %d/s" (int s))
 
         // !!!
 

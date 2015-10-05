@@ -10,13 +10,6 @@ module SinkTests =
     let scope func = func ()
 
     [<Fact>]
-    let WTF () =
-        scope (fun () -> 
-            use x = Async.inheritToken (Some CancellationToken.None)
-            ()
-        )
-
-    [<Fact>]
     let ZmqSyncCanBeOpenedAndClosed () =
         scope (fun () -> 
             use cancel = new CancellationTokenSource()
