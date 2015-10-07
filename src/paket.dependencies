@@ -17,3 +17,4 @@ nuget Caliburn.Micro.Start framework: >= net45
 nuget xunit.runner.console
 nuget xunit.runner.visualstudio
 nuget FAKE
+nuget LibZ.Bootstrap

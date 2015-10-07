@@ -24,6 +24,7 @@ NUGET
       Newtonsoft.Json (>= 6.0.5)
     fszmq (12.1.1) - framework: >= net45
       FSharp.Core
+    LibZ.Bootstrap (1.1.0.2)
     lz4net (1.0.9.93) - framework: >= net45
     Newtonsoft.Json (7.0.1) - framework: >= net45
     Rx-Core (2.2.5) - framework: >= net45

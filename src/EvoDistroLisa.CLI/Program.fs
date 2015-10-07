@@ -43,6 +43,54 @@ module Agent =
 
     let defaultPort = 5801
 
+    type Arguments = 
+        | Connect of host: string * port: int
+        | Restart of string
+        | Resume of string
+        | Agents of int
+        | Gui
+        | Listen of port: int
+        | Suave of port: int
+        interface IArgParserTemplate with
+            member x.Usage = 
+                match x with
+                | Connect _ -> "the host and port to connect to (as client)"
+                | Restart _ -> "restart processing (requires image file)"
+                | Resume _ -> "resume processing (requires bootstrap file)"
+                | Agents _ -> "number of agents"
+                | Gui -> "open GUI window"
+                | Listen _ -> "the port to listen (as server)"
+                | Suave _ -> "the port to listen for HTTP requests"
+
+    let attachMilestone fileName (agent: IAgent) =
+        let bootstrap = { Pixels = agent.Pixels; Scene = agent.Best }
+        agent.Improved
+        |> Observable.sample (TimeSpan.FromSeconds(15.0))
+        |> Observable.map (fun scene -> { bootstrap with Scene = scene })
+        |> Observable.subscribe (fun scene -> File.WriteAllBytes(fileName, scene |> Pickler.save))
+        |> ignore
+
+    let attachVerbose (agent: IAgent) = 
+        Observable.interval (TimeSpan.FromSeconds(1.0))
+        |> Observable.map (fun _ -> agent.Mutations)
+        |> Observable.slidingWindow (TimeSpan.FromSeconds(5.0)) 
+        |> Observable.choose (fun tsm ->
+            let length = tsm.Length
+            if length <= 1 then None
+            else
+                let first, last = tsm.[0], tsm.[length - 1]
+                let time = last.Timestamp.Subtract(first.Timestamp)
+                let diff = last.Value - first.Value
+                (float diff / time.TotalSeconds) |> Some)
+        |> Observable.subscribe (fun speed ->
+            printfn 
+                "Mutations: %d, Speed: %d/s, Polygons: %d, Fitness: %g"
+                agent.Mutations 
+                (int speed) 
+                agent.Best.Scene.Polygons.Length 
+                agent.Best.Fitness)
+        |> ignore
+
     let attachAgents token agents (master: IAgent) = 
         let pixels = master.Pixels
         let best = master.Best
@@ -82,25 +130,6 @@ module Agent =
                 window.Title <- sprintf "%g" fitness)
             |> ignore
         )
-
-    type Arguments = 
-        | Connect of host: string * port: int
-        | Restart of string
-        | Resume of string
-        | Agents of int
-        | Gui
-        | Listen of port: int
-        | Suave of port: int
-        interface IArgParserTemplate with
-            member x.Usage = 
-                match x with
-                | Connect _ -> "the host and port to connect to (as client)"
-                | Restart _ -> "restart processing (requires image file)"
-                | Resume _ -> "resume processing (requires bootstrap file)"
-                | Agents _ -> "number of agents"
-                | Gui -> "open GUI window"
-                | Listen _ -> "the port to listen (as server)"
-                | Suave _ -> "the port to listen for HTTP requests"
 
     let start argv =
         let parser = ArgumentParser.Create<Arguments>()
@@ -151,35 +180,12 @@ module Agent =
             | _ -> Agent.createPassiveAgent pixels best token
 
         match mode with
-        | Restart fn -> sprintf "%s.evoboot" fn |> Some
+        | Restart fn -> sprintf "%s.evo" fn |> Some
         | Resume fn -> fn |> Some
         | _ -> None
-        |> Option.map (fun fn ->
-            let bootstrap = { Pixels = agent.Pixels; Scene = agent.Best }
-            agent.Improved
-            |> Observable.sample (TimeSpan.FromSeconds(15.0))
-            |> Observable.map (fun scene -> { bootstrap with Scene = scene })
-            |> Observable.subscribe (fun scene -> 
-                File.WriteAllBytes(fn, scene |> Pickler.save)))
-        |> ignore
+        |> Option.iter (fun fn -> agent |> attachMilestone fn)
 
-        let speed = 
-            Observable.interval (TimeSpan.FromSeconds(1.0))
-            |> Observable.map (fun _ -> agent.Mutations)
-            |> Observable.slidingWindow (TimeSpan.FromSeconds(5.0)) 
-            |> Observable.choose (fun tsm ->
-                let length = tsm.Length
-                if length <= 1 then None
-                else
-                    let first, last = tsm.[0], tsm.[length - 1]
-                    let time = last.Timestamp.Subtract(first.Timestamp)
-                    let diff = last.Value - first.Value
-                    (float diff / time.TotalSeconds) |> Some)
-            |> Observable.subscribe (fun s ->
-                printfn "Speed: %d/s" (int s))
-
-        // !!!
-
+        agent |> attachVerbose
         agent |> attachAgents token agents |> ignore
 
         match gui with | true -> agent |> attachGui token | _ -> ()

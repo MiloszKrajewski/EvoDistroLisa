@@ -12,12 +12,6 @@ Target "Clean" (fun _ ->
     "./../out" |> DeleteDir
 )
 
-Target "Build" (fun _ -> 
-    !! "*.sln"
-    |> MSBuildRelease buildDir "Build"
-    |> Log "Build-Output: "
-)
-
 Target "Test" (fun _ ->
     !! "*.sln"
     |> MSBuildDebug testDir "Build"
@@ -27,14 +21,40 @@ Target "Test" (fun _ ->
     |> xUnit2 id
 )
 
-Target "Release" (fun _ ->
-    !! "EvoDistroLisa.CLI\EvoDistroLisa.CLI.fsproj"
-    |> MSBuildReleaseExt (releaseDir @@ "cli") [ "Platform", "x64"; "AllowUnsafeBlocks", "true" ] "Rebuild"
-    |> Log "Release-Output: "
-    
-    !! "EvoLisa.original\EvoLisa.sln"
-    |> MSBuildRelease (releaseDir @@ "orig") "Rebuild"
-    |> Log "Release-Output: "
+Target "Build" (fun _ -> 
+    !! "*.sln"
+    |> MSBuildRelease null "Build"
+    |> Log "Build-Output: "
 )
+
+Target "Release" (fun _ ->
+    !! "EvoDistroLisa.CLI/bin/Release/*.exe"
+    ++ "EvoDistroLisa.CLI/bin/Release/*.exe.config"
+    ++ "EvoDistroLisa.CLI/bin/Release/*.dll"
+    ++ "EvoDistroLisa.CLI/bin/Release/monalisa.png"
+    |> CopyFiles "./../out/cli"
+
+    let libz args = 
+        { defaultParams with
+            Program = "packages/LibZ.Bootstrap/tools/libz.exe"
+            WorkingDirectory = "./../out/cli"
+            CommandLine = args }
+        |> shellExec
+
+    libz "add -l evo.libz -i *.dll --move" |> ignore
+    libz "instrument -a EvoDistroLisa.CLI.exe --libz-file evo.libz" |> ignore
+
+    !! "./../out/cli/EvoDistroLisa.CLI.exe*"
+    |> Seq.iter (fun fn -> fn |> Rename (fn.Replace("EvoDistroLisa.CLI.", "evo.")))
+)
+
+Target "Zip" (fun _ ->
+    !! "./../out/cli/*.*"
+    |> Zip "./../out/cli" "./../out/evo-release.zip"
+)
+
+"Clean" ==> "Release"
+"Build" ==> "Release"
+"Release" ==> "Zip"
 
 RunTargetOrDefault "Build"
