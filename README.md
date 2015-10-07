@@ -1,20 +1,26 @@
 # EvoDistroLisa
-Roger Johansson's (aka Roger Alsing) EvoLisa reborn (with F# and ZMQ)
+Roger Johansson's (aka Roger Alsing) EvoLisa reborn (with F# and ZeroMQ)
 
-Build:
+## Download
+
+Download from [release page](https://github.com/MiloszKrajewski/EvoDistroLisa/releases)
+
+## Build
+
+To build it yourself:
+
 ```
-cd src
-fake build
+release.cmd
 ```
 
-Run server:
+Please note, executables will be in `./out/cli`
+
+## Server
 ```
-cd out\build
-EvoDistroLisa.CLI.exe --restart monalisa.png --agents 1 --listen 5801 --gui
+evo.exe --agents 1 --listen 5801 --gui --restart monalisa.png
 ```
 
-Run client:
+## Client
 ```
-cd out\build
-EvoDistroLisa.CLI.exe --connect 127.0.0.1 5801 --agents 4
+evo.exe --connect 127.0.0.1 5801 --agents 4
 ```
