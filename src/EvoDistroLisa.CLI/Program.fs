@@ -16,13 +16,13 @@ module Web =
 
     let pickler = FsPickler.CreateJsonSerializer()
 
-    let saveJpeg (agent: IAgent) = 
+    let savePng (agent: IAgent) = 
         let width, height = agent.Pixels.Width, agent.Pixels.Height
         let scene = agent.Best.Scene
-        WpfRender.renderJpeg width height scene
+        WpfRender.renderToPng width height scene
     
     let start token port (agent: IAgent) = 
-        let imageProvider = warbler (fun _ -> agent |> saveJpeg |> ok) >>= Writers.setMimeType "image/jpeg"
+        let imageProvider = warbler (fun _ -> agent |> savePng |> ok) >>= Writers.setMimeType "image/png"
         let jsonProvider = warbler (fun _ -> agent.Best |> pickler.Pickle |> ok) >>= Writers.setMimeType "text/json"
         let app = choose [ path "/image" >>= imageProvider; path "/json" >>= jsonProvider ]
         let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
@@ -150,6 +150,19 @@ module Agent =
             | _, Some a -> a
             | _ -> Agent.createPassiveAgent pixels best token
 
+        match mode with
+        | Restart fn -> sprintf "%s.evoboot" fn |> Some
+        | Resume fn -> fn |> Some
+        | _ -> None
+        |> Option.map (fun fn ->
+            let bootstrap = { Pixels = agent.Pixels; Scene = agent.Best }
+            agent.Improved
+            |> Observable.sample (TimeSpan.FromSeconds(15.0))
+            |> Observable.map (fun scene -> { bootstrap with Scene = scene })
+            |> Observable.subscribe (fun scene -> 
+                File.WriteAllBytes(fn, scene |> Pickler.save)))
+        |> ignore
+
         let speed = 
             Observable.interval (TimeSpan.FromSeconds(1.0))
             |> Observable.map (fun _ -> agent.Mutations)
@@ -163,7 +176,7 @@ module Agent =
                     let diff = last.Value - first.Value
                     (float diff / time.TotalSeconds) |> Some)
             |> Observable.subscribe (fun s ->
-                printfn "speed: %d/s" (int s))
+                printfn "Speed: %d/s" (int s))
 
         // !!!
 

@@ -48,11 +48,11 @@ module WpfRender =
         bitmap.Render(vis)
         bitmap
 
-    let renderJpeg width height scene = 
+    let renderToPng width height scene = 
         let target = 
             RenderTargetBitmap(width, height, 96.0, 96.0, PixelFormats.Pbgra32)
         render target scene |> ignore
-        let encoder = JpegBitmapEncoder()
+        let encoder = PngBitmapEncoder()
         use stream = new MemoryStream()
         encoder.Frames.Add(BitmapFrame.Create(target))
         encoder.Save(stream)
