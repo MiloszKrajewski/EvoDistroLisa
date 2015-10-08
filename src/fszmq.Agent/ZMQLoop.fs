@@ -82,6 +82,16 @@ type ZMQLoop (?context: Context, ?token: CancellationToken) =
     member x.CreateReceiver(socket: Socket, decoder: byte[][] -> 'msg, handler: 'msg -> unit) = 
         createReceiver (decoder >> handler) socket
 
+    member x.CreateReceiver(socket: Socket) =
+        let event = Event<_>()
+        createReceiver event.Trigger socket
+        event.Publish :> IObservable<_>
+
+    member x.CreateReceiver(socket: Socket, decoder: byte[][] -> 'msg) = 
+        let event = Event<_>()
+        createReceiver (decoder >> event.Trigger) socket
+        event.Publish :> IObservable<_>
+
     member x.CreateResponder(socket: Socket, handler: byte[][] -> byte[][]) = 
         createResponder handler socket
 
