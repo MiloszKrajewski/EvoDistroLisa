@@ -15,7 +15,7 @@ module Renderers =
         [ (0.2, 0.1); (0.1, 0.9); (0.9, 0.4) ] 
         |> Seq.map (fun (x, y) -> { X = x; Y = y })
         |> Array.ofSeq
-    let triangle = { Polygons = [| { Brush = red; Points = points } |]; Cargo = null }
+    let triangle = { Polygons = [| { Brush = red; Points = points } |] }
 
     let saveGDI filename (bitmap: Bitmap) = 
         bitmap.Save(filename)

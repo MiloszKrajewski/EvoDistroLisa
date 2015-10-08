@@ -15,7 +15,7 @@ module ZmqServer =
 
         let repSocket = 
             let socket = Context.rep ctx
-            port |> sprintf "tcp://*:%d" |> Socket.bind socket 
+            port |> sprintf "tcp://*:%d" |> Socket.bind socket
             zmq.RegisterSocket(socket)
         let pubSocket, pubPort =
             let socket = Context.pub ctx

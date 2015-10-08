@@ -31,6 +31,7 @@ module ZmqClient =
             let pushSocket = Context.push ctx
             Socket.connect subSocket (sprintf "tcp://%s:%d" addr subPort)
             Socket.connect pushSocket (sprintf "tcp://%s:%d" addr pushPort)
+            Socket.subscribe subSocket [ ""B ]
             
             zmq.RegisterSocket(subSocket), zmq.RegisterSocket(pushSocket), bootstrap
         let { Pixels = pixels; Scene = best } = bootstrap

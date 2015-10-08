@@ -7,8 +7,8 @@ module Domain =
     type Polygon = { Brush: Brush; Points: Point array }
     type Pixels = { Width: int; Height: int; Pixels: uint32[] }
     type Scene = 
-        { Polygons: Polygon array; Cargo: obj }
-        static member Zero = { Polygons = Array.empty; Cargo = null }
+        { Polygons: Polygon array }
+        static member Zero = { Polygons = Array.empty }
     type RenderedScene = 
         { Scene: Scene; Fitness: decimal }
         static member Zero = { Scene = Scene.Zero; Fitness = 0m }
