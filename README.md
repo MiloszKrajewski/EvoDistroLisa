@@ -7,6 +7,10 @@ So, this is Distributed Parallel EvoLisa reimplemented from the scrach using F#,
 
 Please note that tuning of this "hill climbing" algorithm (I think that's the name) was not my primary concern at all.
 
+[![monalisa](http://img.youtube.com/vi/so-rcp8U0HA/0.jpg)](https://www.youtube.com/watch?v=so-rcp8U0HA)
+
+(Please note, this clip is an fast-forward output from original EvoLisa, and is included to give you idea how it works)
+
 ## Download
 
 Download from [release page](https://github.com/MiloszKrajewski/EvoDistroLisa/releases)
