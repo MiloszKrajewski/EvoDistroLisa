@@ -45,6 +45,8 @@ github: https://goo.gl/9kBDiI
 
 ### Domain
 
+Note: the code presented is usually a little bit idealized with "implementation induced ugliness" removed
+
 ---
 
 ### Point
@@ -57,15 +59,14 @@ github: https://goo.gl/9kBDiI
 ### Color & Brush
 
  	[lang=fs]
-	type Color = { R: double; G: double; B: double }
-	type Brush = { A: double; Color: Color }
+	type Brush = { A: double; R: double; G: double; B: double }
 
 ---
 
 ### Polyline & Polygon
 
 	[lang=fs]
-	type Polyline = Point list
+	type Polyline = Point array
 	type Polygon = { Brush: Brush; Points: Polyline }
 
 ---
@@ -80,39 +81,113 @@ github: https://goo.gl/9kBDiI
 ### Scene & RenderedScene
 
 	[lang=fs]
-	type Scene = { Polygons: Polygon list }
+	type Scene = { Polygons: Polygon array }
 	type RenderedScene = { Scene: Scene; Fitness: double }
 
 ---
 
-### Renderer & Fitter
-
-	[lang=fs]
-	type Renderer = Scene -> Pixels
-	type Fitter = Pixels -> double
-
----
-
-### Mutator
+### Improve
 
 	[lang=fs]
 	type Mutator = Scene -> Scene
+	type Renderer = Scene -> Pixels
+	type Fitter = Pixels -> double
+
+	let tryImprove mutator renderer fitter (champion: RenderedScene) =
+		let challenger = champion.Scene |> mutator
+		{ Scene = challenger; Fitness = challenger |> renderer |> fitter }
 
 ---
 
-### RNG
+### Select
+
+	let chooseBest publish (champion: RenderedScene) challengers =
+		let fitnessOf (scene: RenderedScene) = scene.Fitness
+		let challenger = challengers |> Seq.maxBy fitnessOf
+		match champion.Fitness >= challenger.Fitness with
+		| true -> champion
+		| _ -> publish challenger; challenger
+
+### The Loop!
+
+	let loop mutate render fit champion outbox inbox = async {
+		let inline recv () = Agent.recvMany inbox
+		let inline publish scene = Agent.send outbox scene
+		let inline feedback scene = Agent.send inbox scene
+		let! challengers = Agent.recvMany inbox
+		match select challengers chamtion with
+		| Champion _ -> champion
+		| Challenger challenger ->
+			outbox |> Agent.send challenger
+			challenger
+		|> improve mutate render fit
+		|>
+	}
+
+
+---
+
+### Random Number Generator
 
 	[lang=fs]
 	type RNG = unit -> double
 
 ---
 
-### Factories
+### Let's mutatate
+
+    [lang=fs]
+    let mutateScene rng scene =
+        { scene with
+			Polygons = mutatePolygons rng scene.Polygons }
+
+---
 
 	[lang=fs]
-	type MutatorFactory = RNG -> Mutator
-	type FitterFactory = Pixels -> Fitter
+	let mutatePolygons rng polygons =
+		polygons
+		|> removePolygon rng
+		|> insertPolygon rng
+		|> shufflePolygons rng
+		|> Array.map (mutatePolygon rng)
 
+---
+
+	[lang=fs]
+	let mutatePolygon rng polygon =
+		{ polygon with
+			Brush = mutateBrush rng polygon.Brush
+			Points = mutatePoints rng polygon.Points }
+
+---
+
+	[lang=fs]
+	let mutateBrush rng brush =
+		{ brush with
+			A = mutateValue rng brush.A
+			R = mutateValue rng brush.R
+			G = mutateValue rng brush.G
+			B = mutateValue rng brush.B }
+
+---
+
+	[lang=fs]
+	let mutatePoints rng points =
+		points
+		|> removePoint rng
+		|> insertPoint rng
+		|> shufflePoints rng
+		|> Array.map (mutatePoint rng)
+
+---
+
+	[lang=fs]
+	let mutatePoint rng point =
+		{ point with
+			X = mutateValue rng point.X
+			Y = mutateValue rng point.Y }
+
+---
 
 ### What are design patterns?
 
