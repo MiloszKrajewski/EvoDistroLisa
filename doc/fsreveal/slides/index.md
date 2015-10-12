@@ -20,7 +20,7 @@ blog: http://goo.gl/UY48nn
 
 github: https://goo.gl/9kBDiI
 
-binary: https://goo.gl/VXjcal
+https://github.com/MiloszKrajewski/EvoDistroLisa
 
 ***
 
@@ -399,11 +399,9 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Download
 
-https://goo.gl/VXjcal
-
-or
-
 https://github.com/MiloszKrajewski/EvoDistroLisa
+
+(go to releases)
 
 ---
 
