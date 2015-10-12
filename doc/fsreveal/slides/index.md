@@ -114,6 +114,12 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ---
 
+### Mutate, Render, Fit
+
+![mutate, render, fit](images/mutate-render-fit.png)
+
+---
+
 ### Select
 
 ![select](images/select.png)
@@ -133,12 +139,6 @@ The code presented is usually a little bit idealized with "implementation induce
         match fitnessOf challenger > fitnessOf champion with
         | true -> challenger |> publish; challenger
         | _ -> champion
-
----
-
-### Mutate, Render, Fit
-
-![mutate, render, fit](images/mutate-render-fit.png)
 
 ---
 
@@ -364,6 +364,68 @@ The code presented is usually a little bit idealized with "implementation induce
 # Demo
 
 ![live coding](images/live-coding.jpg)
+
+---
+
+### Download
+
+https://goo.gl/VXjcal
+
+or
+
+https://github.com/MiloszKrajewski/EvoDistroLisa
+
+---
+
+### Server
+
+    [lang=bash]
+    evo.exe --listen 5801 --suave 5802 --agents 4 --gui --restart monalisa.png
+
+---
+
+### Client
+
+    [lang=bash]
+    evo.exe --agents 4 --gui --connect <ip> 5801
+
+***
+
+### Conclussion
+
+- Random is not thread safe
+- GDI+ is much faster than WPF (to draw polygons)
+- GDI+ has internal locks so only one threads may use it
+- WPF uses anti-aliasing
+- Anti-aliasing in WPF cannot be turned off
+- WritableBitmapEx does not use anti-aliasing
+- WritableBitmapEx is more portable but slower than WPF
+- All ZeroMQ operations on socket need to be in the same thread
+
+---
+
+### Excuses
+
+This project provided me with excuses to use:
+
+- Suave.IO
+- FsPickler
+- ArgU
+- ZeroMQ
+- Rx
+- xUnit
+- FAKE
+- Paket
+
+---
+
+### Excuses for the future
+
+- Elm / TypeScript client
+- HTML5 Canvas
+- WebSockets / SignalR
+- Windows Phone / Android app
+- Running agents on Azure
 
 ***
 
