@@ -110,13 +110,65 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ***
 
-# Spin!
+# Mutate
+
+---
+
+### Scene
+
+    [lang=fs]
+    // type RNG = unit -> double
+
+    let mutateScene rng scene =
+        scene
+        |> removePolygon rng
+        |> insertPolygon rng
+        |> shufflePolygons rng
+        |> Array.map (mutatePolygon rng)
+
+---
+
+### Polygon
+
+    [lang=fs]
+    let mutatePolygon rng polygon =
+        { polygon with
+            Brush = mutateBrush rng polygon.Brush
+            Points = mutatePoints rng polygon.Points }
+
+    let mutateBrush rng brush =
+        { brush with
+            A = mutateValue rng brush.A
+            R = mutateValue rng brush.R
+            G = mutateValue rng brush.G
+            B = mutateValue rng brush.B }
+
+    let mutatePoints rng points =
+        points
+        |> removePoint rng
+        |> insertPoint rng
+        |> shufflePoints rng
+        |> Array.map (mutatePoint rng)
+
+---
+
+### Point
+
+    [lang=fs]
+    let mutatePoint rng point =
+        { point with
+            X = mutateValue rng point.X
+            Y = mutateValue rng point.Y }
 
 ---
 
 ### Mutate, Render, Fit
 
 ![mutate, render, fit](images/mutate-render-fit.png)
+
+***
+
+# Spin!
 
 ---
 
@@ -213,58 +265,6 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ***
 
-# Mutate!
-
----
-
-### Scene
-
-    [lang=fs]
-    // type RNG = unit -> double
-
-    let mutateScene rng scene =
-        scene
-        |> removePolygon rng
-        |> insertPolygon rng
-        |> shufflePolygons rng
-        |> Array.map (mutatePolygon rng)
-
----
-
-### Polygon
-
-    [lang=fs]
-    let mutatePolygon rng polygon =
-        { polygon with
-            Brush = mutateBrush rng polygon.Brush
-            Points = mutatePoints rng polygon.Points }
-
-    let mutateBrush rng brush =
-        { brush with
-            A = mutateValue rng brush.A
-            R = mutateValue rng brush.R
-            G = mutateValue rng brush.G
-            B = mutateValue rng brush.B }
-
-    let mutatePoints rng points =
-        points
-        |> removePoint rng
-        |> insertPoint rng
-        |> shufflePoints rng
-        |> Array.map (mutatePoint rng)
-
----
-
-### Point
-
-    [lang=fs]
-    let mutatePoint rng point =
-        { point with
-            X = mutateValue rng point.X
-            Y = mutateValue rng point.Y }
-
-***
-
 # Agent
 
 ![agent](images/agent.png)
@@ -291,10 +291,8 @@ The code presented is usually a little bit idealized with "implementation induce
         let publish scene = scene |> improved.Trigger
         let agent = Agent.start (loop publish champion)
         { new IAgent with 
-            member x.Push(scene: RenderedScene) = 
-                agent |> Agent.send scene
-            member x.Improved = 
-                improved.Publish :> IObservable<_> 
+            member x.Push(scene: RenderedScene) = agent |> Agent.send scene
+            member x.Improved = improved.Publish :> IObservable<_> 
         }
 
     let createPassiveAgent champion = 
