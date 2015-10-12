@@ -41,7 +41,8 @@ Target "Release" (fun _ ->
             CommandLine = args }
         |> shellExec
 
-    libz "add -l evo.libz -i *.dll --move" |> ignore
+    // -e Suave.dll
+    libz "add -l evo.libz -i *.dll -e Suave.dll --move" |> ignore
     libz "instrument -a EvoDistroLisa.CLI.exe --libz-file evo.libz" |> ignore
 
     !! "./../out/cli/EvoDistroLisa.CLI.exe*"

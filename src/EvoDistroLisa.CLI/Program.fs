@@ -6,27 +6,33 @@ open System.Threading
 open System.Drawing
 
 module Web = 
-    open Suave.Http
-    open Suave.Http.Successful
-    open Suave.Http.Applicatives
+    open System.Net
     open FSharp.Fx
     open Nessos.FsPickler.Json
     open EvoDistroLisa
     open EvoDistroLisa.Engine
+    open Suave.Http
+    open Suave.Http.Successful
+    open Suave.Http.Applicatives
+    open Suave.Web
+    open Suave.Types
+    open Suave.Sockets
 
     let pickler = FsPickler.CreateJsonSerializer()
 
     let savePng (agent: IAgent) = 
         let width, height = agent.Pixels.Width, agent.Pixels.Height
         let scene = agent.Best.Scene
-        WpfRender.renderToPng width height scene
+        scene |> WpfRender.renderToPng width height
     
     let start token port (agent: IAgent) = 
         let imageProvider = warbler (fun _ -> agent |> savePng |> ok) >>= Writers.setMimeType "image/png"
         let jsonProvider = warbler (fun _ -> agent.Best |> pickler.Pickle |> ok) >>= Writers.setMimeType "text/json"
         let app = choose [ path "/image" >>= imageProvider; path "/json" >>= jsonProvider ]
-        let loop () = Suave.Web.startWebServer Suave.Web.defaultConfig app
-        Async.startThread token loop () |> ignore
+        let binding = { scheme = HTTP; socketBinding = { ip = IPAddress.Any; port = uint16 port } }
+        let config = { defaultConfig with bindings = [ binding ] }
+        let serverLoop () = startWebServer config app
+        Async.startThread token serverLoop () |> ignore
         printfn "Suave listening at %d..." port
 
 module Agent = 

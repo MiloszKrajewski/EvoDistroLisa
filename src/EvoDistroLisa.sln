@@ -1,12 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{B29B15D0-352D-4ED6-986F-735FE312F1B9}"
 	ProjectSection(SolutionItems) = preProject
 		build.fsx = build.fsx
+		fake.cmd = fake.cmd
+		paket.cmd = paket.cmd
 		paket.dependencies = paket.dependencies
+		test.fsx = test.fsx
+		test_fakes.fsx = test_fakes.fsx
 	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "EvoDistroLisa.Engine", "EvoDistroLisa.Engine\EvoDistroLisa.Engine.fsproj", "{60EECA86-CA2D-40A4-8688-DC9225126D2D}"

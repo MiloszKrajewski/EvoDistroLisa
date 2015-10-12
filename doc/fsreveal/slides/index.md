@@ -6,10 +6,18 @@
 
 ***
 
-## EvoDistroLisa - EvoLisa resurected by Agents
+# EvoDistroLisa
+
+### EvoLisa resurected by Agents
+
+![mona-lq](images/mona-lq.png) ![mona-hq](images/mona-hq.png) ![mona](images/monalisa.png)
+
+---
 
 youtube: http://goo.gl/g6hnnm
+
 blog: http://goo.gl/UY48nn
+
 github: https://goo.gl/9kBDiI
 
 ***
@@ -44,37 +52,49 @@ github: https://goo.gl/9kBDiI
 
 ***
 
-### Domain
+### Disclaimer
 
-Note: the code presented is usually a little bit idealized with "implementation induced ugliness" removed
+As a learning project started long time ago, the code is not what I would write today. I tried to polish it a little bit for this presentation, but I'm still not happy...
+
+The code presented is usually a little bit idealized with "implementation induced ugliness" removed, and it is not working code but just close approximation of it.
+
+***
+
+# Domain
 
 ---
 
 ### Point
 
-	[lang=fs]
-	type Point = { X: double; Y: double }
+    [lang=fs]
+    type Point = { X: double; Y: double }
+
+![point](images/point.png)
 
 ---
 
 ### Brush
 
- 	[lang=fs]
-	type Brush = { A: double; R: double; G: double; B: double }
+	[lang=fs]
+    type Brush = { A: double; R: double; G: double; B: double }
+
+![brush](images/brush.png)
 
 ---
 
 ### Polygon
 
-	[lang=fs]
-	type Polygon = { Brush: Brush; Points: Point array }
+    [lang=fs]
+    type Polygon = { Brush: Brush; Points: Point array }
+
+![polygon](images/polygon.png)
 
 ---
 
 ### Pixels
 
-	[lang=fs]
-	type Pixels = { Width: int; Height: int; Pixels: uint32 array }
+    [lang=fs]
+    type Pixels = { Width: int; Height: int; Pixels: uint32 array }
 
 `uint32 array` is used for performance reasons and should store pixels in PARGB32 format.
 
@@ -82,120 +102,268 @@ Note: the code presented is usually a little bit idealized with "implementation 
 
 ### Scene & RenderedScene
 
-	[lang=fs]
-	type Scene = Polygon array
-	type RenderedScene = { Scene: Scene; Fitness: double }
+    [lang=fs]
+    type Scene = Polygon array
+    type RenderedScene = { Scene: Scene; Fitness: double }
 
----
+![scene](images/scene.png)
 
-### Publish
+***
 
-	[lang=fs]
-	let improved = Event<RenderedScene>()
-	let publish scene = improved.Trigger scene; scene
-
-	// let inline apply func arg = func arg |> ignore; arg
+# Spin!
 
 ---
 
 ### Select
 
-	[lang=fs]
-	let select champion challengers =
-		let fitnessOf (scene: RenderedScene) = scene.Fitness
-		let challenger = challengers |> Seq.maxBy fitnessOf
-		match fitnessOf champion >= fitnessOf challenger with
-		| true -> champion
-		| _ -> challenger |> publish
+![select](images/select.png)
+
+---
+
+### Select
+
+    [lang=fs]
+    // type Publisher = RenderedScene -> unit
+    // type RenderedScene = { Scene: Scene; Fitness: double }
+
+    let inline fitnessOf (scene: RenderedScene) = scene.Fitness
+
+    let select publish champion challengers =
+        let challenger = challengers |> Seq.maxBy fitnessOf
+        match fitnessOf challenger > fitnessOf champion with
+        | true -> challenger |> publish; challenger
+        | _ -> champion
+
+---
+
+### Mutate, Render, Fit
+
+![mutate, render, fit](images/mutate-render-fit.png)
 
 ---
 
 ### Improve
 
-	[lang=fs]
-	type Mutator = Scene -> Scene
-	type Renderer = Scene -> Pixels
-	type Fitter = Pixels -> double
-
-	let improve mutate render fit champion =
-		let challenger = champion |> mutate
-		let fitness = challenger |> render |> fit
-		{ Scene = challenger; Fitness = fitness }
+![improve](images/improve.png)
 
 ---
 
-	[lang=fs]
-	let activeLoop mutate render fit champion inbox = async {
-		let! challengers = inbox |> Agent.recvMany
-		let champion = challengers |> select publisher champion
-		let challenger = champion |> improve mutate render fit
-		inbox |> Agent.send challenger
-		do! activeLoop mutate render fit champion inbox
-	}
+### Improve
+
+    [lang=fs]
+    // type Mutator = Scene -> Scene
+    // type Renderer = Scene -> 'Pixels
+    // type Fitter = 'Pixels -> double
+    // type RenderedScene = { Scene: Scene; Fitness: double }
+
+    let inline sceneOf (scene: RenderedScene) = scene.Scene
+
+    let improve mutate render fit champion =
+        let challenger = champion |> sceneOf |> mutate
+        let fitness = challenger |> render |> fit
+        { Scene = challenger; Fitness = fitness }
 
 ---
 
-	[lang=fs]
-	let passiveLoop champion inbox = async {
-		let! challengers = inbox |> Agent.recvMany
-		let champion = challengers |> select publish champion
-		do! passiveLoop champion inbox
-	}
+### Passive loop
+
+![passive loop](images/passive-loop.png)
 
 ---
 
-### Random Number Generator
+### Passive loop
 
-	[lang=fs]
-	type RNG = unit -> double
+    [lang=fs]
+    let rec passiveLoop publish champion inbox = async {
+        let! challengers = inbox |> Agent.recvMany
+        let champion' = challengers |> select publish champion
+        do! passiveLoop publish champion' inbox
+    }
 
----
-
-### Let's mutatate
-
-	[lang=fs]
-	let mutateScene rng scene =
-		polygons
-		|> removePolygon rng
-		|> insertPolygon rng
-		|> shufflePolygons rng
-		|> Array.map (mutatePolygon rng)
+**Note**: "others" are the only source of candidates
 
 ---
 
-	[lang=fs]
-	let mutatePolygon rng polygon =
-		{ polygon with
-			Brush = mutateBrush rng polygon.Brush
-			Points = mutatePoints rng polygon.Points }
+### Active loop
+
+![active loop](images/active-loop.png)
 
 ---
 
-	[lang=fs]
-	let mutateBrush rng brush =
-		{ brush with
-			A = mutateValue rng brush.A
-			R = mutateValue rng brush.R
-			G = mutateValue rng brush.G
-			B = mutateValue rng brush.B }
+### Active loop
+
+    [lang=fs]
+    let rec activeLoop mutate render fit publish champion inbox = async {
+        let! challengers = inbox |> Agent.recvMany
+        let champion' = challengers |> select publish champion
+        let challenger' = champion |> improve mutate render fit
+        inbox |> Agent.send challenger'
+        do! activeLoop mutate render fit publish champion' inbox
+    }
 
 ---
 
-	[lang=fs]
-	let mutatePoints rng points =
-		points
-		|> removePoint rng
-		|> insertPoint rng
-		|> shufflePoints rng
-		|> Array.map (mutatePoint rng)
+    [lang=fs]
+    // let rec passiveLoop publish champion inbox = async { ... }
+    // let rec activeLoop mutate render fit publish champion inbox = async { ... }
+
+    typeof(passiveLoop) == typeof(activeLoop mutate render fit)
+
+**Note**: passive and active loop implement the same "interface"
+
+***
+
+# Mutate!
 
 ---
 
-	[lang=fs]
-	let mutatePoint rng point =
-		{ point with
-			X = mutateValue rng point.X
-			Y = mutateValue rng point.Y }
+### Scene
+
+    [lang=fs]
+    // type RNG = unit -> double
+
+    let mutateScene rng scene =
+        scene
+        |> removePolygon rng
+        |> insertPolygon rng
+        |> shufflePolygons rng
+        |> Array.map (mutatePolygon rng)
+
+---
+
+### Polygon
+
+    [lang=fs]
+    let mutatePolygon rng polygon =
+        { polygon with
+            Brush = mutateBrush rng polygon.Brush
+            Points = mutatePoints rng polygon.Points }
+
+    let mutateBrush rng brush =
+        { brush with
+            A = mutateValue rng brush.A
+            R = mutateValue rng brush.R
+            G = mutateValue rng brush.G
+            B = mutateValue rng brush.B }
+
+    let mutatePoints rng points =
+        points
+        |> removePoint rng
+        |> insertPoint rng
+        |> shufflePoints rng
+        |> Array.map (mutatePoint rng)
+
+---
+
+### Point
+
+    [lang=fs]
+    let mutatePoint rng point =
+        { point with
+            X = mutateValue rng point.X
+            Y = mutateValue rng point.Y }
+
+***
+
+# Agent
+
+![agent](images/agent.png)
+
+---
+
+### Agent
+
+    [lang=fs]
+    [<Interface>]
+    type IAgent = 
+        abstract member Push: RenderedScene -> unit
+        abstract member Improved: IObservable<RenderedScene>
+
+---
+
+### Wrapping loops as agents
+    
+    [lang=fs]
+    // let rec passiveLoop publish champion inbox = async { ... }
+
+    let createAgent loop champion =
+        let improved = Event<RenderedScene>()
+        let publish scene = scene |> improved.Trigger
+        let agent = Agent.start (loop publish champion)
+        { new IAgent with 
+            member x.Push(scene: RenderedScene) = 
+                agent |> Agent.send scene
+            member x.Improved = 
+                improved.Publish :> IObservable<_> 
+        }
+
+    let createPassiveAgent champion = 
+        champion |> createAgent passiveLoop
+
+    let createActiveAgent mutate render fit champion = 
+        champion |> createAgent (activeLoop mutate render fit)
+
+---
+
+### Attach agent
+
+![attach agent](images/attach-agent.png)
+
+---
+
+### Attach agent
+
+    [lang=fs]
+    let attachAgent (slave: IAgent) (master: IAgent) =
+        master.Improved |> Observable.subscribe slave.Push |> ignore
+        slave.Improved |> Observable.subscribe master.Push |> ignore
+
+---
+
+### Composite agent
+
+![composite agent](images/composite-agent.png)
+
+---
+
+### Composite agent
+
+    [lang=fs]
+    let createCompositeAgent count mutate render fit champion = 
+        let master = createActiveAgent mutate render fit champion
+        { 2..count } |> Seq.iter (fun _ ->
+            let slave = createActiveAgent mutate render fit champion
+            master |> attachAgent slave
+        )
+        master
+
+***
+
+### Socket agent
+
+![socket agent](images/socket-agent.png)
+
+---
+
+### Socket agent
+
+    [lang=fs]
+    let encode message = message |> Pickler.save
+    let decode<'a> bytes = bytes |> Pickler.load<'a>
+
+    let createSocketAgent subSocket pubSocket champion =
+        let send scene = pubSocket |> Socket.send (scene |> encode)
+        let received = subSocket |> Socket.observe |> Observable.map decode
+        let agent = createPassiveAgent champion
+        received |> Observable.subscribe agent.Push
+        agent.Improved |> Observable.subscribe send
+        agent
+
+***
+
+# Demo
+
+![live coding](images/live-coding.jpg)
 
 ***
 
