@@ -20,6 +20,8 @@ blog: http://goo.gl/UY48nn
 
 github: https://goo.gl/9kBDiI
 
+binary: https://goo.gl/VXjcal
+
 ***
 
 ### About me
@@ -160,7 +162,37 @@ The code presented is usually a little bit idealized with "implementation induce
             X = mutateValue rng point.X
             Y = mutateValue rng point.Y }
 
+***
+
+# Render 
+
 ---
+
+    [lang=fs]
+    let render bitmap scene = 
+        scene |> Seq.iter (renderPolygon bitmap)
+        bitmap
+        
+***
+
+# Fit
+
+---
+
+![fitness](images/fitness.png)
+
+---
+
+    [lang=fs]
+    let fit (original: Pixels) (bitmap: Pixels) =
+        let mutable diff = 0
+        let length = original.Pixels.Length
+        for p = 0 to length - 1 do 
+            diff <- diff + stddev(original.[p], bitmap.[p])
+        let maxdiff = (long length) * (long 255*255*255)
+        1.0 - (double diff / double maxdiff)
+
+***
 
 ### Mutate, Render, Fit
 
@@ -256,8 +288,8 @@ The code presented is usually a little bit idealized with "implementation induce
 ---
 
     [lang=fs]
-    // let rec passiveLoop publish champion inbox = async { ... }
-    // let rec activeLoop mutate render fit publish champion inbox = async { ... }
+    // let passiveLoop publish champion inbox = ...
+    // let activeLoop mutate render fit publish champion inbox = ...
 
     typeof(passiveLoop) == typeof(activeLoop mutate render fit)
 
