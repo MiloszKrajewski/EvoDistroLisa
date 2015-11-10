@@ -66,8 +66,9 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Point
 
-    [lang=fs]
-    type Point = { X: double; Y: double }
+```fsharp
+type Point = { X: double; Y: double }
+```
 
 ![point](images/point.png)
 
@@ -75,8 +76,9 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Brush
 
-	[lang=fs]
-    type Brush = { A: double; R: double; G: double; B: double }
+```fsharp
+type Brush = { A: double; R: double; G: double; B: double }
+```
 
 ![brush](images/brush.png)
 
@@ -84,8 +86,9 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Polygon
 
-    [lang=fs]
-    type Polygon = { Brush: Brush; Points: Point array }
+```fsharp
+type Polygon = { Brush: Brush; Points: Point array }
+```
 
 ![polygon](images/polygon.png)
 
@@ -93,8 +96,9 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Pixels
 
-    [lang=fs]
-    type Pixels = { Width: int; Height: int; Pixels: uint32 array }
+```fsharp
+type Pixels = { Width: int; Height: int; Pixels: uint32 array }
+```
 
 `uint32 array` is used for performance reasons and stores pixels in PARGB32 format.
 
@@ -102,9 +106,10 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Scene & RenderedScene
 
-    [lang=fs]
-    type Scene = Polygon array
-    type RenderedScene = { Scene: Scene; Fitness: double }
+```fsharp
+type Scene = Polygon array
+type RenderedScene = { Scene: Scene; Fitness: double }
+```
 
 ![scene](images/scene.png)
 
@@ -112,78 +117,25 @@ The code presented is usually a little bit idealized with "implementation induce
 
 # Mutate
 
-    [lang=fs]
-    type Mutator = Scene -> Scene
-
----
-
-### Scene
-
-    [lang=fs]
-    let mutateScene rng scene =
-        scene
-        |> removePolygon rng
-        |> insertPolygon rng
-        |> shufflePolygons rng
-        |> Array.map (mutatePolygon rng)
-
----
-
-### Polygon
-
-    [lang=fs]
-    let mutatePolygon rng polygon =
-        { polygon with
-            Brush = mutateBrush rng polygon.Brush
-            Points = mutatePoints rng polygon.Points }
-
-    let mutateBrush rng brush =
-        { brush with
-            A = mutateValue rng brush.A
-            R = mutateValue rng brush.R
-            G = mutateValue rng brush.G
-            B = mutateValue rng brush.B }
-
-    let mutatePoints rng points =
-        points
-        |> removePoint rng
-        |> insertPoint rng
-        |> shufflePoints rng
-        |> Array.map (mutatePoint rng)
-
----
-
-### Point
-
-    [lang=fs]
-    let mutatePoint rng point =
-        { point with
-            X = mutateValue rng point.X
-            Y = mutateValue rng point.Y }
+```fsharp
+type Mutator = Scene -> Scene
+```
 
 ***
 
 # Render
 
-    [lang=fs]
-    type Renderer = Scene -> 'Bitmap
-
----
-
-    [lang=fs]
-    let renderScene bitmap scene =
-        scene |> Seq.iter (renderPolygon bitmap)
-        bitmap
-
-    let renderPolygon bitmap polygon =
-        ... // framework specific
+```fsharp
+type Renderer = Scene -> 'Pixels
+```
 
 ***
 
 # Fit
 
-    [lang=fs]
-    type Fitter = 'Pixels -> double
+```fsharp
+type Fitter = 'Pixels -> double
+```
 
 ---
 
@@ -209,40 +161,18 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Select
 
-    [lang=fs]
-    // type Publisher = RenderedScene -> unit
-    // type RenderedScene = { Scene: Scene; Fitness: double }
+```fsharp
+// type Publisher = RenderedScene -> unit
+// type RenderedScene = { Scene: Scene; Fitness: double }
 
-    let inline fitnessOf (scene: RenderedScene) = scene.Fitness
+let inline fitnessOf (scene: RenderedScene) = scene.Fitness
 
-    let select publish champion challengers =
-        let challenger = challengers |> Seq.maxBy fitnessOf
-        match fitnessOf challenger > fitnessOf champion with
-        | true -> challenger |> publish; challenger
-        | _ -> champion
-
----
-
-### Improve
-
-![improve](images/improve.png)
-
----
-
-### Improve
-
-    [lang=fs]
-    // type Mutator = Scene -> Scene
-    // type Renderer = Scene -> 'Pixels
-    // type Fitter = 'Pixels -> double
-    // type RenderedScene = { Scene: Scene; Fitness: double }
-
-    let inline sceneOf (scene: RenderedScene) = scene.Scene
-
-    let improve mutate render fit champion =
-        let challenger = champion |> sceneOf |> mutate
-        let fitness = challenger |> render |> fit
-        { Scene = challenger; Fitness = fitness }
+let select publish champion challengers =
+    let challenger = challengers |> Seq.maxBy fitnessOf
+    match fitnessOf challenger > fitnessOf champion with
+    | true -> challenger |> publish; challenger
+    | _ -> champion
+```
 
 ---
 
@@ -254,14 +184,39 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Passive loop
 
-    [lang=fs]
-    let rec passiveLoop publish champion inbox = async {
-        let! challengers = inbox |> Agent.recvMany
-        let champion' = challengers |> select publish champion
-        do! passiveLoop publish champion' inbox
-    }
+```fsharp
+let rec passiveLoop publish champion inbox = async {
+    let! challengers = inbox |> Agent.recvMany
+    let champion' = challengers |> select publish champion
+    do! passiveLoop publish champion' inbox
+}
+```
 
 **Note**: "others" are the only source of candidates
+
+---
+
+### Improve
+
+![improve](images/improve.png)
+
+---
+
+### Improve
+
+```fsharp
+// type Mutator = Scene -> Scene
+// type Renderer = Scene -> 'Pixels
+// type Fitter = 'Pixels -> double
+// type RenderedScene = { Scene: Scene; Fitness: double }
+
+let inline sceneOf (scene: RenderedScene) = scene.Scene
+
+let improve mutate render fit champion =
+    let challenger = champion |> sceneOf |> mutate
+    let fitness = challenger |> render |> fit
+    { Scene = challenger; Fitness = fitness }
+```
 
 ---
 
@@ -273,22 +228,24 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Active loop
 
-    [lang=fs]
-    let rec activeLoop mutate render fit publish champion inbox = async {
-        let! challengers = inbox |> Agent.recvMany
-        let champion' = challengers |> select publish champion
-        let challenger' = champion |> improve mutate render fit
-        inbox |> Agent.send challenger'
-        do! activeLoop mutate render fit publish champion' inbox
-    }
+```fsharp
+let rec activeLoop mutate render fit publish champion inbox = async {
+    let! challengers = inbox |> Agent.recvMany
+    let champion' = challengers |> select publish champion
+    let challenger' = champion |> improve mutate render fit
+    inbox |> Agent.send challenger'
+    do! activeLoop mutate render fit publish champion' inbox
+}
+```
 
 ---
 
-    [lang=fs]
-    // let passiveLoop publish champion inbox = ...
-    // let activeLoop mutate render fit publish champion inbox = ...
+```fsharp
+// let passiveLoop publish champion inbox = ...
+// let activeLoop mutate render fit publish champion inbox = ...
 
-    typeof(passiveLoop) == typeof(activeLoop mutate render fit)
+typeof(passiveLoop) == typeof(activeLoop mutate render fit)
+```
 
 **Note**: passive and active loop implement the same "interface"
 
@@ -302,33 +259,35 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Agent
 
-    [lang=fs]
-    [<Interface>]
-    type IAgent =
-        abstract member Push: RenderedScene -> unit
-        abstract member Improved: IObservable<RenderedScene>
+```fsharp
+[<Interface>]
+type IAgent =
+    abstract member Push: RenderedScene -> unit
+    abstract member Improved: IObservable<RenderedScene>
+```
 
 ---
 
 ### Wrapping loops as agents
 
-    [lang=fs]
-    // let rec passiveLoop publish champion inbox = async { ... }
+```fsharp
+// let rec passiveLoop publish champion inbox = async { ... }
 
-    let createAgent loop champion =
-        let improved = Event<RenderedScene>()
-        let publish scene = scene |> improved.Trigger
-        let agent = Agent.start (loop publish champion)
-        { new IAgent with
-            member x.Push(scene: RenderedScene) = agent |> Agent.send scene
-            member x.Improved = improved.Publish :> IObservable<_>
-        }
+let createAgent loop champion =
+    let improved = Event<RenderedScene>()
+    let publish scene = scene |> improved.Trigger
+    let agent = Agent.start (loop publish champion)
+    { new IAgent with
+        member x.Push(scene: RenderedScene) = agent |> Agent.send scene
+        member x.Improved = improved.Publish :> IObservable<_>
+    }
 
-    let createPassiveAgent champion =
-        champion |> createAgent passiveLoop
+let createPassiveAgent champion =
+    champion |> createAgent passiveLoop
 
-    let createActiveAgent mutate render fit champion =
-        champion |> createAgent (activeLoop mutate render fit)
+let createActiveAgent mutate render fit champion =
+    champion |> createAgent (activeLoop mutate render fit)
+```
 
 ---
 
@@ -340,10 +299,11 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Attach agent
 
-    [lang=fs]
-    let attachAgent (slave: IAgent) (master: IAgent) =
-        master.Improved |> Observable.subscribe slave.Push |> ignore
-        slave.Improved |> Observable.subscribe master.Push |> ignore
+```fsharp
+let attachAgent (slave: IAgent) (master: IAgent) =
+    master.Improved |> Observable.subscribe slave.Push |> ignore
+    slave.Improved |> Observable.subscribe master.Push |> ignore
+```
 
 ---
 
@@ -355,14 +315,15 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Composite agent
 
-    [lang=fs]
-    let createCompositeAgent count mutate render fit champion =
-        let master = createActiveAgent mutate render fit champion
-        { 2..count } |> Seq.iter (fun _ ->
-            let slave = createActiveAgent mutate render fit champion
-            master |> attachAgent slave
-        )
-        master
+```fsharp
+let createCompositeAgent count mutate render fit champion =
+    let master = createActiveAgent mutate render fit champion
+    { 2..count } |> Seq.iter (fun _ ->
+        let slave = createActiveAgent mutate render fit champion
+        master |> attachAgent slave
+    )
+    master
+```
 
 ***
 
@@ -374,17 +335,18 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ### Socket agent
 
-    [lang=fs]
-    let encode message = message |> Pickler.save
-    let decode<'a> bytes = bytes |> Pickler.load<'a>
+```fsharp
+let encode message = message |> Pickler.save
+let decode<'a> bytes = bytes |> Pickler.load<'a>
 
-    let createSocketAgent subSocket pubSocket champion =
-        let send scene = pubSocket |> Socket.send (scene |> encode)
-        let received = subSocket |> Socket.observe |> Observable.map decode
-        let agent = createPassiveAgent champion
-        received |> Observable.subscribe agent.Push
-        agent.Improved |> Observable.subscribe send
-        agent
+let createSocketAgent subSocket pubSocket champion =
+    let send scene = pubSocket |> Socket.send (scene |> encode)
+    let received = subSocket |> Socket.observe |> Observable.map decode
+    let agent = createPassiveAgent champion
+    received |> Observable.subscribe agent.Push
+    agent.Improved |> Observable.subscribe send
+    agent
+```
 
 ***
 
@@ -404,15 +366,17 @@ https://github.com/MiloszKrajewski/EvoDistroLisa
 
 ### Server
 
-    [lang=bash]
-    evo.exe --listen 5801 --suave 5802 --agents 4 --gui --restart monalisa.png
+```shell
+evo.exe --listen 5801 --suave 5802 --agents 4 --gui --restart monalisa.png
+```
 
 ---
 
 ### Client
 
-    [lang=bash]
-    evo.exe --agents 4 --gui --connect <ip> 5801
+```shell
+evo.exe --agents 4 --gui --connect <ip> 5801
+```
 
 ***
 
@@ -447,6 +411,7 @@ This project provided me with excuses to use:
 ### Excuses for the future
 
 - Elm / TypeScript client
+- Akka.NET with Akka.Persistence
 - HTML5 Canvas
 - WebSockets / SignalR
 - Windows Phone / Android app
