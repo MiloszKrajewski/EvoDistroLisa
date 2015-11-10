@@ -8,7 +8,7 @@
 
 # EvoDistroLisa
 
-### EvoLisa resurected by Agents
+### actor based cooperative hill climbing
 
 ![mona-lq](images/mona-lq.png) ![mona-hq](images/mona-hq.png) ![mona](images/monalisa.png)
 
@@ -19,8 +19,6 @@ youtube: http://goo.gl/g6hnnm
 blog: http://goo.gl/UY48nn
 
 github: https://goo.gl/9kBDiI
-
-https://github.com/MiloszKrajewski/EvoDistroLisa
 
 ***
 
@@ -98,7 +96,7 @@ The code presented is usually a little bit idealized with "implementation induce
     [lang=fs]
     type Pixels = { Width: int; Height: int; Pixels: uint32 array }
 
-`uint32 array` is used for performance reasons and should store pixels in PARGB32 format.
+`uint32 array` is used for performance reasons and stores pixels in PARGB32 format.
 
 ---
 
@@ -114,13 +112,14 @@ The code presented is usually a little bit idealized with "implementation induce
 
 # Mutate
 
+    [lang=fs]
+    type Mutator = Scene -> Scene
+
 ---
 
 ### Scene
 
     [lang=fs]
-    // type RNG = unit -> double
-
     let mutateScene rng scene =
         scene
         |> removePolygon rng
@@ -164,33 +163,31 @@ The code presented is usually a little bit idealized with "implementation induce
 
 ***
 
-# Render 
+# Render
+
+    [lang=fs]
+    type Renderer = Scene -> 'Bitmap
 
 ---
 
     [lang=fs]
-    let render bitmap scene = 
+    let renderScene bitmap scene =
         scene |> Seq.iter (renderPolygon bitmap)
         bitmap
-        
+
+    let renderPolygon bitmap polygon =
+        ... // framework specific
+
 ***
 
 # Fit
 
+    [lang=fs]
+    type Fitter = 'Pixels -> double
+
 ---
 
 ![fitness](images/fitness.png)
-
----
-
-    [lang=fs]
-    let fit (original: Pixels) (bitmap: Pixels) =
-        let mutable diff = 0
-        let length = original.Pixels.Length
-        for p = 0 to length - 1 do 
-            diff <- diff + stddev(original.[p], bitmap.[p])
-        let maxdiff = (long length) * (long 255*255*255)
-        1.0 - (double diff / double maxdiff)
 
 ***
 
@@ -307,14 +304,14 @@ The code presented is usually a little bit idealized with "implementation induce
 
     [lang=fs]
     [<Interface>]
-    type IAgent = 
+    type IAgent =
         abstract member Push: RenderedScene -> unit
         abstract member Improved: IObservable<RenderedScene>
 
 ---
 
 ### Wrapping loops as agents
-    
+
     [lang=fs]
     // let rec passiveLoop publish champion inbox = async { ... }
 
@@ -322,15 +319,15 @@ The code presented is usually a little bit idealized with "implementation induce
         let improved = Event<RenderedScene>()
         let publish scene = scene |> improved.Trigger
         let agent = Agent.start (loop publish champion)
-        { new IAgent with 
+        { new IAgent with
             member x.Push(scene: RenderedScene) = agent |> Agent.send scene
-            member x.Improved = improved.Publish :> IObservable<_> 
+            member x.Improved = improved.Publish :> IObservable<_>
         }
 
-    let createPassiveAgent champion = 
+    let createPassiveAgent champion =
         champion |> createAgent passiveLoop
 
-    let createActiveAgent mutate render fit champion = 
+    let createActiveAgent mutate render fit champion =
         champion |> createAgent (activeLoop mutate render fit)
 
 ---
@@ -359,7 +356,7 @@ The code presented is usually a little bit idealized with "implementation induce
 ### Composite agent
 
     [lang=fs]
-    let createCompositeAgent count mutate render fit champion = 
+    let createCompositeAgent count mutate render fit champion =
         let master = createActiveAgent mutate render fit champion
         { 2..count } |> Seq.iter (fun _ ->
             let slave = createActiveAgent mutate render fit champion
