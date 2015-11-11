@@ -97,10 +97,11 @@ type Polygon = { Brush: Brush; Points: Point array }
 ### Pixels
 
 ```fsharp
-type Pixels = { Width: int; Height: int; Pixels: uint32 array }
+type Pixel = uint32
+type Pixels = { Width: int; Height: int; Pixels: Pixel array }
 ```
 
-`uint32 array` is used for performance reasons and stores pixels in PARGB32 format.
+`uint32` is used for performance reasons and stores pixel in PARGB32 format.
 
 ---
 
@@ -115,11 +116,23 @@ type RenderedScene = { Scene: Scene; Fitness: double }
 
 ***
 
+# Select
+
+```fsharp
+type Selector = RenderedScene seq -> RenderedScene
+```
+
+![select](images/selector.png)
+
+***
+
 # Mutate
 
 ```fsharp
 type Mutator = Scene -> Scene
 ```
+
+![mutate](images/mutate.png)
 
 ***
 
@@ -129,6 +142,8 @@ type Mutator = Scene -> Scene
 type Renderer = Scene -> 'Pixels
 ```
 
+![render](images/render.png)
+
 ***
 
 # Fit
@@ -137,13 +152,11 @@ type Renderer = Scene -> 'Pixels
 type Fitter = 'Pixels -> double
 ```
 
----
-
 ![fitness](images/fitness.png)
 
 ***
 
-### Mutate, Render, Fit
+### Mutate >> Render >> Fit
 
 ![mutate, render, fit](images/mutate-render-fit.png)
 
@@ -311,6 +324,8 @@ let attachAgent (slave: IAgent) (master: IAgent) =
 
 ![composite agent](images/composite-agent.png)
 
+...is an agent...
+
 ---
 
 ### Composite agent
@@ -331,6 +346,14 @@ let createCompositeAgent count mutate render fit champion =
 
 ![socket agent](images/socket-agent.png)
 
+...is an agent...
+
+---
+
+### Socket agent
+
+![socket agent](images/socket-agent-2pc.png)
+
 ---
 
 ### Socket agent
@@ -350,6 +373,14 @@ let createSocketAgent subSocket pubSocket champion =
 
 ***
 
+### GUI agent
+
+![GUI agent](images/gui-agent.png)
+
+...is an agent...
+
+***
+
 # Demo
 
 ![live coding](images/live-coding.jpg)
@@ -358,9 +389,18 @@ let createSocketAgent subSocket pubSocket champion =
 
 ### Download
 
-https://github.com/MiloszKrajewski/EvoDistroLisa
+https://goo.gl/9kBDiI
 
 (go to releases)
+
+---
+
+### Network
+
+```shell
+net: NeilsNet
+pass: xapcdnut
+```
 
 ---
 
@@ -410,8 +450,11 @@ This project provided me with excuses to use:
 
 ### Excuses for the future
 
-- Elm / TypeScript client
 - Akka.NET with Akka.Persistence
+- DirectX / OpenGL for rendering
+- GPU for fitness
+- Mono / Docker
+- Elm / TypeScript client
 - HTML5 Canvas
 - WebSockets / SignalR
 - Windows Phone / Android app
