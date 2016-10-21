@@ -398,8 +398,8 @@ https://goo.gl/9kBDiI
 ### Network
 
 ```shell
-net: NeilsNet
-pass: xapcdnut
+net: kranet-wrt
+pass: dddcam12
 ```
 
 ---
