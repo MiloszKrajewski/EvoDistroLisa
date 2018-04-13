@@ -197,7 +197,6 @@ FakesAssemblies/
 
 # custom ignores
 /out/
-/src/.paket/
-!/src/.paket/paket.bootstrapper.exe
-!/src/.paket/paket.targets
-/src/.fake/
+src/.paket/
+src/.fake/
+src/paket-files/

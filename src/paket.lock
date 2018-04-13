@@ -1,54 +1,53 @@
 NUGET
-  remote: https://nuget.org/api/v2
-  specs:
-    Argu (1.1.0) - framework: >= net45
+  remote: https://www.nuget.org/api/v2
+    Argu (1.1) - restriction: >= net45
     FAKE (4.5.2)
-    FSharp.Collections.ParallelSeq (1.0.2) - framework: >= net45
-    FSharp.Control.Reactive (3.2.0) - framework: >= net45
+    FSharp.Collections.ParallelSeq (1.0.2) - restriction: >= net45
+    FSharp.Control.Reactive (3.2) - restriction: >= net45
       FSharp.Core (>= 3.1.2)
       Rx-Core (>= 2.2.5)
       Rx-Interfaces (>= 2.2.5)
       Rx-Linq (>= 2.2.5)
-    FSharp.Core (4.0.0.1) - framework: >= net45
-    FsPickler (1.4.0) - framework: >= net45
-    FsPickler.Json (1.4.0) - framework: >= net45
-      FsPickler (1.4.0)
+    FSharp.Core (4.0.0.1) - restriction: >= net45
+    FsPickler (1.4) - restriction: >= net45
+    FsPickler.Json (1.4) - restriction: >= net45
+      FsPickler (1.4)
       Newtonsoft.Json (>= 6.0.5)
-    fszmq (12.1.1) - framework: >= net45
+    fszmq (12.1.1) - restriction: >= net45
       FSharp.Core
     LibZ.Bootstrap (1.1.0.2)
-    lz4net (1.0.9.93) - framework: >= net45
-    Newtonsoft.Json (7.0.1) - framework: >= net45
-    Rx-Core (2.2.5) - framework: >= net45
+    lz4net (1.0.9.93) - restriction: >= net45
+    Newtonsoft.Json (7.0.1) - restriction: >= net45
+    Rx-Core (2.2.5) - restriction: >= net45
       Rx-Interfaces (>= 2.2.5)
-    Rx-Interfaces (2.2.5) - framework: >= net45
-    Rx-Linq (2.2.5) - framework: >= net45
+    Rx-Interfaces (2.2.5) - restriction: >= net45
+    Rx-Linq (2.2.5) - restriction: >= net45
       Rx-Core (>= 2.2.5)
       Rx-Interfaces (>= 2.2.5)
-    Rx-Main (2.2.5) - framework: >= net45
+    Rx-Main (2.2.5) - restriction: >= net45
       Rx-Core (>= 2.2.5)
       Rx-Interfaces (>= 2.2.5)
       Rx-Linq (>= 2.2.5)
       Rx-PlatformServices (>= 2.2.5)
-    Rx-PlatformServices (2.2.5) - framework: >= net45
+    Rx-PlatformServices (2.2.5) - restriction: >= net45
       Rx-Core (>= 2.2.5)
       Rx-Interfaces (>= 2.2.5)
-    Rx-WPF (2.2.5) - framework: >= net45
+    Rx-WPF (2.2.5) - restriction: >= net45
       Rx-Xaml (>= 2.2.5)
-    Rx-Xaml (2.2.5) - framework: >= net45
+    Rx-Xaml (2.2.5) - restriction: >= net45
       Rx-Main (>= 2.2.5)
-    Suave (0.31.2) - framework: >= net45
+    Suave (0.31.2) - restriction: >= net45
       FSharp.Core (>= 3.1.2.5)
       FsPickler (>= 1.2.5)
-    WriteableBitmapEx (1.5.0) - framework: >= net45
-    xunit (2.0.0) - framework: >= net45
-      xunit.assert (2.0.0)
-      xunit.core (2.0.0)
-    xunit.abstractions (2.0.0) - framework: >= net45
-    xunit.assert (2.0.0) - framework: >= net45
-    xunit.core (2.0.0) - framework: >= net45
-      xunit.extensibility.core (2.0.0)
-    xunit.extensibility.core (2.0.0) - framework: >= net45
-      xunit.abstractions (2.0.0)
-    xunit.runner.console (2.1.0)
-    xunit.runner.visualstudio (2.1.0)
+    WriteableBitmapEx (1.5) - restriction: >= net45
+    xunit (2.0) - restriction: >= net45
+      xunit.assert (2.0)
+      xunit.core (2.0)
+    xunit.abstractions (2.0) - restriction: >= net45
+    xunit.assert (2.0) - restriction: >= net45
+    xunit.core (2.0) - restriction: >= net45
+      xunit.extensibility.core (2.0)
+    xunit.extensibility.core (2.0) - restriction: >= net45
+      xunit.abstractions (2.0)
+    xunit.runner.console (2.1)
+    xunit.runner.visualstudio (2.1)
